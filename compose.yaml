@@ -28,8 +28,8 @@ services:
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
@@ -42,6 +42,19 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: ["/workspace/.venv/bin/alembic", "upgrade", "head"]
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/travel_agent
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
   web:
     build:
@@ -62,4 +75,3 @@ services:
 
 volumes:
   postgres-data:
-

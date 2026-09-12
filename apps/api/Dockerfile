@@ -15,8 +15,9 @@ RUN uv sync --frozen --no-dev
 
 COPY apps ./apps
 COPY packages ./packages
+COPY alembic.ini ./alembic.ini
+COPY migrations ./migrations
 
 EXPOSE 8000
 
 CMD ["/workspace/.venv/bin/uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

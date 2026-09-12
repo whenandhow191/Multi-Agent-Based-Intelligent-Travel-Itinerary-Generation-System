@@ -14,6 +14,8 @@
     "typecheck": "uv run --active mypy && pnpm --filter @travel/web typecheck",
     "test": "uv run --active pytest && pnpm --filter @travel/web test",
     "build": "pnpm --filter @travel/web build",
+    "db:upgrade": "uv run --active alembic upgrade head",
+    "db:sql": "uv run --active alembic upgrade head --sql",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   }
 }
