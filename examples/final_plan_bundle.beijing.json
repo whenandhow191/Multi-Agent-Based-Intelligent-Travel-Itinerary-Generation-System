@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "run_id": "run_beijing_001",
+  "request_summary": {
+    "schema_version": "1.0",
+    "request_id": "request_beijing_001",
+    "origin": "上海",
+    "destination": "北京",
+    "start_date": "2026-10-01",
+    "end_date": "2026-10-01",
+    "days": 1,
+    "timezone": "Asia/Shanghai",
+    "party": {
+      "adults": 2,
+      "children": 0,
+      "seniors": 0,
+      "mobility_restricted": false,
+      "accessibility_needs": []
+    },
+    "budget": {
+      "total": "1000.00",
+      "currency": "CNY",
+      "policy": "hard",
+      "flexibility_percent": 0
+    },
+    "hard_constraints": {
+      "daily_time_window": {
+        "start": "09:00:00",
+        "end": "21:00:00"
+      },
+      "must_visit": ["故宫博物院"],
+      "excluded_places": [],
+      "dietary_restrictions": [],
+      "fixed_appointments": [],
+      "max_activity_minutes_per_day": 600
+    },
+    "soft_preferences": {
+      "interests": ["历史"],
+      "pace": "balanced",
+      "day_period": "neutral",
+      "transport_modes": ["public_transit"],
+      "lodging_preferences": [],
+      "dining_preferences": []
+    },
+    "natural_language_notes": "纯合成示例，不代表真实开放时间或价格。"
+  },
+  "assumptions": [
+    "所有价格和开放时间均为测试数据。"
+  ],
+  "plans": [
+    {
+      "plan_id": "plan_balanced_001",
+      "title": "北京历史一日均衡方案",
+      "strategy": "balanced",
+      "days": [
+        {
+          "date": "2026-10-01",
+          "timezone": "Asia/Shanghai",
+          "items": [
+            {
+              "plan_item_id": "item_palace_001",
+              "start_at": "2026-10-01T09:30:00+08:00",
+              "end_at": "2026-10-01T12:00:00+08:00",
+              "place_id": "place_palace_001",
+              "activity": "参观合成数据中的故宫博物院候选点",
+              "estimated_cost": {
+                "kind": "known",
+                "currency": "CNY",
+                "lower": "120.00",
+                "upper": "120.00",
+                "basis": "两位成人的合成测试价格"
+              },
+              "route_from_previous_id": null,
+              "travel_mode_from_previous": null,
+              "travel_minutes_from_previous": null,
+              "claim_ids": ["claim_palace_open_001"],
+              "evidence_ids": ["evidence_palace_001"]
+            }
+          ],
+          "daily_cost": {
+            "kind": "known",
+            "currency": "CNY",
+            "lower": "120.00",
+            "upper": "120.00",
+            "basis": "当日项目程序化求和"
+          },
+          "warnings": []
+        }
+      ],
+      "total_cost": {
+        "kind": "known",
+        "currency": "CNY",
+        "lower": "120.00",
+        "upper": "120.00",
+        "basis": "全部日期程序化求和"
+      },
+      "score_breakdown": {
+        "feasibility": 1.0,
+        "preference_match": 0.9,
+        "budget_fit": 1.0,
+        "risk_resilience": 0.8,
+        "evidence_quality": 1.0
+      },
+      "is_executable": true,
+      "unresolved_risks": []
+    }
+  ],
+  "comparison": {
+    "entries": [
+      {
+        "plan_id": "plan_balanced_001",
+        "total_cost": {
+          "kind": "known",
+          "currency": "CNY",
+          "lower": "120.00",
+          "upper": "120.00",
+          "basis": "全部日期程序化求和"
+        },
+        "activity_count": 1,
+        "commute_minutes": 0,
+        "free_minutes": 570,
+        "preference_coverage": 1.0,
+        "risk_count": 0,
+        "evidence_coverage": 1.0
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "evidence_id": "evidence_palace_001",
+      "source_name": "项目纯合成测试源",
+      "source_url_or_provider_id": "fixture:place_palace_001",
+      "provider": "fixture",
+      "retrieved_at": "2026-09-12T08:00:00+08:00",
+      "valid_until": "2026-10-02T08:00:00+08:00",
+      "field_paths": [
+        "plans[0].days[0].items[0]"
+      ],
+      "freshness": "fresh",
+      "confidence": 1.0,
+      "storage_policy": "full_licensed"
+    }
+  ],
+  "collaboration_summary": {
+    "participating_agents": [
+      "coordinator",
+      "destination_research",
+      "mobility_lodging",
+      "itinerary_planner",
+      "critic"
+    ],
+    "completed_task_count": 5,
+    "revision_rounds": 0,
+    "notes": [
+      "本示例只验证结构，不代表 Agent 已在 C09 实现。"
+    ]
+  },
+  "generated_at": "2026-09-12T08:05:00+08:00",
+  "data_freshness": {
+    "overall": "fresh",
+    "oldest_retrieved_at": "2026-09-12T08:00:00+08:00",
+    "stale_evidence_count": 0,
+    "unknown_evidence_count": 0
+  }
+}
+
