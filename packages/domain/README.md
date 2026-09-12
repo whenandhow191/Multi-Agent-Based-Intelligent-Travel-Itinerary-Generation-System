@@ -4,3 +4,13 @@
 
 依赖方向：它位于依赖图底层，不依赖 API、Harness、Agent 或具体工具适配器。
 
+## 当前模块
+
+- `common.py`：不可变、禁止多余字段的领域模型基类与公共标量。
+- `trip_request.py`：`TripRequest`、同行人、预算、硬约束、软偏好和澄清问题。
+
+验证示例：
+
+```powershell
+uv run pytest tests/test_trip_request.py
+```
