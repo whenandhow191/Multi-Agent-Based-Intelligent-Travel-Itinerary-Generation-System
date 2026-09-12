@@ -2,5 +2,4 @@
 
 `tests` 保存跨应用与包的自动化验证。随着项目发展，将拆分为 `unit`、`integration`、`contract`、`e2e`、`chaos` 和 `evals`。
 
-当前的 `test_package_imports.py` 证明 C01 创建的空包可以从仓库根目录导入。
-
+当前测试覆盖工程导入与健康检查、类型化配置、C06～C09 领域契约、C10 纯合成 Fixture/ScriptedModel，以及 C11 确定性校验器。所有领域测试都可以在无网络、无外部 API Key 的环境中执行。

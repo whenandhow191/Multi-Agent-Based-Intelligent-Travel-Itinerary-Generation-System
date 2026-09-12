@@ -11,6 +11,7 @@
 - `messaging.py`：`Task`、`Event`、`ArtifactRef`、`Claim`、`Evidence` 与状态枚举。
 - `travel.py`：POI、路线、天气、住宿、城际交通、费用区间与坐标系内部模型。
 - `itinerary.py`：候选方案、审校、修复请求、对比和 `FinalPlanBundle`。
+- `validators.py`：预算、时间窗、重叠、开放时间、坐标系与引用完整性纯函数校验器。
 
 验证示例：
 
@@ -19,4 +20,5 @@ uv run pytest tests/test_trip_request.py
 uv run pytest tests/test_messaging.py
 uv run pytest tests/test_travel_models.py
 uv run pytest tests/test_itinerary_contracts.py
+uv run pytest tests/test_validators.py
 ```

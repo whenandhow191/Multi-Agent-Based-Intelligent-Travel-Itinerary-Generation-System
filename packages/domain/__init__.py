@@ -64,6 +64,19 @@ from packages.domain.trip_request import (
     TripBudget,
     TripRequest,
 )
+from packages.domain.validators import (
+    ValidationCode,
+    ValidationIssue,
+    ValidationReport,
+    ValidationSeverity,
+    validate_budget,
+    validate_coordinates,
+    validate_itinerary,
+    validate_opening_hours,
+    validate_overlaps,
+    validate_references,
+    validate_time_windows,
+)
 
 __all__ = [
     "ArtifactRef",
@@ -120,6 +133,17 @@ __all__ = [
     "TripBudget",
     "TripRequest",
     "VisitDurationEstimate",
+    "ValidationCode",
+    "ValidationIssue",
+    "ValidationReport",
+    "ValidationSeverity",
     "WeatherForecast",
     "Weekday",
+    "validate_budget",
+    "validate_coordinates",
+    "validate_itinerary",
+    "validate_opening_hours",
+    "validate_overlaps",
+    "validate_references",
+    "validate_time_windows",
 ]
