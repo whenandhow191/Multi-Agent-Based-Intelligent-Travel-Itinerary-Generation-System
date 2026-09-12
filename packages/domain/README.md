@@ -9,10 +9,12 @@
 - `common.py`：不可变、禁止多余字段的领域模型基类与公共标量。
 - `trip_request.py`：`TripRequest`、同行人、预算、硬约束、软偏好和澄清问题。
 - `messaging.py`：`Task`、`Event`、`ArtifactRef`、`Claim`、`Evidence` 与状态枚举。
+- `travel.py`：POI、路线、天气、住宿、城际交通、费用区间与坐标系内部模型。
 
 验证示例：
 
 ```powershell
 uv run pytest tests/test_trip_request.py
 uv run pytest tests/test_messaging.py
+uv run pytest tests/test_travel_models.py
 ```
