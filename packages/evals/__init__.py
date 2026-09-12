@@ -1,6 +1,7 @@
 """Evaluation datasets, runners, and quality metrics."""
 
 from packages.evals.fixtures import SyntheticScenario, build_synthetic_scenario
+from packages.evals.scripted_gateway import ScriptedModelGateway
 from packages.evals.scripted_model import (
     FinishReason,
     ScriptedCall,
@@ -15,6 +16,7 @@ __all__ = [
     "FinishReason",
     "ScriptedCall",
     "ScriptedModel",
+    "ScriptedModelGateway",
     "ScriptedToolCall",
     "ScriptedTurn",
     "ScriptedUsage",
