@@ -25,6 +25,20 @@ pnpm check
 
 该命令依次执行格式检查、Lint、类型检查和测试，与 GitHub Actions 保持一致。
 
+## 本地启动
+
+```powershell
+conda env create --prefix .\.conda\env --file environment.yml
+conda activate .\.conda\env
+uv sync --all-groups
+pnpm install
+Copy-Item .env.example .env
+python -m apps.api.config doctor
+docker compose up --build
+```
+
+项目专用 Conda 环境、uv 虚拟环境、依赖缓存和 `.env` 均已被 Git 忽略。默认 Mock 模式不要求任何外部 Provider Key。
+
 ## 参与贡献
 
 请先阅读 [贡献指南](./CONTRIBUTING.md)。本项目采用 MIT License。

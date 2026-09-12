@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from apps.api.settings import get_settings
+
 
 class HealthResponse(BaseModel):
     """Stable response returned by the API liveness endpoint."""
@@ -15,6 +17,8 @@ class HealthResponse(BaseModel):
     version: str
 
 
+settings = get_settings()
+
 app = FastAPI(
     title="Multi-Agent Travel Planner API",
     version="0.1.0",
@@ -22,7 +26,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=settings.cors_origins,
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["*"],
