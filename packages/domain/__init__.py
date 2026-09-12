@@ -1,5 +1,18 @@
 """Provider-neutral domain contracts and deterministic business rules."""
 
+from packages.domain.messaging import (
+    ArtifactRef,
+    Claim,
+    ClaimStatus,
+    Event,
+    EventType,
+    Evidence,
+    Freshness,
+    RunState,
+    StoragePolicy,
+    Task,
+    TaskState,
+)
 from packages.domain.trip_request import (
     BudgetPolicy,
     ClarificationQuestion,
@@ -15,13 +28,24 @@ from packages.domain.trip_request import (
 )
 
 __all__ = [
+    "ArtifactRef",
     "BudgetPolicy",
+    "Claim",
+    "ClaimStatus",
     "ClarificationQuestion",
     "DailyTimeWindow",
     "DayPeriodPreference",
+    "Event",
+    "EventType",
+    "Evidence",
     "FixedAppointment",
+    "Freshness",
     "HardConstraints",
+    "RunState",
     "SoftPreferences",
+    "StoragePolicy",
+    "Task",
+    "TaskState",
     "TravelPace",
     "TravelParty",
     "TripBudget",

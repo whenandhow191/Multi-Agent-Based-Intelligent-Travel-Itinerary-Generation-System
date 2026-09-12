@@ -8,9 +8,11 @@
 
 - `common.py`：不可变、禁止多余字段的领域模型基类与公共标量。
 - `trip_request.py`：`TripRequest`、同行人、预算、硬约束、软偏好和澄清问题。
+- `messaging.py`：`Task`、`Event`、`ArtifactRef`、`Claim`、`Evidence` 与状态枚举。
 
 验证示例：
 
 ```powershell
 uv run pytest tests/test_trip_request.py
+uv run pytest tests/test_messaging.py
 ```
