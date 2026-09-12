@@ -13,6 +13,21 @@ from packages.harness.model_gateway import (
     ModelUsage,
     TraceContext,
 )
+from packages.harness.tool_gateway import (
+    FixtureEchoInput,
+    FixtureEchoOutput,
+    ToolContext,
+    ToolDefinition,
+    ToolExecutionResult,
+    ToolGateway,
+    ToolGatewayError,
+    ToolInputValidationError,
+    ToolNotFoundError,
+    ToolOutputValidationError,
+    ToolPermissionError,
+    ToolRegistry,
+    fixture_echo_tool,
+)
 
 __all__ = [
     "FinishReason",
@@ -26,4 +41,17 @@ __all__ = [
     "ModelTurn",
     "ModelUsage",
     "TraceContext",
+    "FixtureEchoInput",
+    "FixtureEchoOutput",
+    "ToolContext",
+    "ToolDefinition",
+    "ToolExecutionResult",
+    "ToolGateway",
+    "ToolGatewayError",
+    "ToolInputValidationError",
+    "ToolNotFoundError",
+    "ToolOutputValidationError",
+    "ToolPermissionError",
+    "ToolRegistry",
+    "fixture_echo_tool",
 ]
