@@ -14,6 +14,12 @@ from packages.agents.destination_intelligence import (
     DestinationIntelligenceAgent,
     DestinationResearchArtifact,
 )
+from packages.agents.itinerary_planning import (
+    PLANNING_TOOL_ALLOWLIST,
+    DeterministicItineraryOptimizer,
+    ItineraryPlanningAgent,
+    PlanningInfeasibleError,
+)
 from packages.agents.mobility_lodging import (
     MOBILITY_LODGING_TOOL_ALLOWLIST,
     ConnectionRisk,
@@ -33,12 +39,16 @@ __all__ = [
     "DestinationIntelArtifact",
     "DestinationIntelligenceAgent",
     "DestinationResearchArtifact",
+    "DeterministicItineraryOptimizer",
     "DispatchBudget",
     "MOBILITY_LODGING_TOOL_ALLOWLIST",
     "ConnectionRisk",
     "LogisticsArtifact",
     "MobilityLodgingAgent",
     "MobilityLodgingArtifact",
+    "PLANNING_TOOL_ALLOWLIST",
+    "ItineraryPlanningAgent",
+    "PlanningInfeasibleError",
     "ProviderFailure",
     "RouteScope",
     "TaskBlueprint",
