@@ -1,0 +1,31 @@
+[
+  {
+    "output": null,
+    "tool_calls": [
+      {
+        "call_id": "call_places_fixture",
+        "tool_name": "places.search",
+        "arguments": {
+          "city": "北京",
+          "query": "历史"
+        }
+      }
+    ],
+    "usage": {
+      "input_tokens": 10,
+      "output_tokens": 5
+    },
+    "finish_reason": "tool_calls"
+  },
+  {
+    "output": {
+      "summary": "synthetic fixed response"
+    },
+    "tool_calls": [],
+    "usage": {
+      "input_tokens": 12,
+      "output_tokens": 7
+    },
+    "finish_reason": "stop"
+  }
+]
