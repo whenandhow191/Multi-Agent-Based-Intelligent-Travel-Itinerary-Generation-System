@@ -1,3 +1,19 @@
-"""Coordinator and specialist agent implementations."""
+"""Coordinator and specialist Agent implementations."""
 
-__all__: list[str] = []
+from packages.agents.coordinator import (
+    CoordinatorAction,
+    CoordinatorBrain,
+    CoordinatorDecision,
+    CoordinatorTaskGraph,
+    DispatchBudget,
+    TaskBlueprint,
+)
+
+__all__ = [
+    "CoordinatorAction",
+    "CoordinatorBrain",
+    "CoordinatorDecision",
+    "CoordinatorTaskGraph",
+    "DispatchBudget",
+    "TaskBlueprint",
+]

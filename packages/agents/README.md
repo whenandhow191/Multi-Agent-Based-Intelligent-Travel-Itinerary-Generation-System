@@ -4,3 +4,8 @@
 
 边界：Agent 只通过 Harness 接收任务、发布 Artifact，并通过 Tool Gateway 申请工具调用；Agent 之间不直接互调。
 
+当前实现：
+
+- `coordinator.py`：把合法 `TripRequest` 转换为固定白名单 DAG；存在阻塞问题时返回 `WAITING_USER`。
+- Coordinator 只声明任务、依赖和预算，不携带可执行回调，也不生成 POI、路线、价格等旅行事实。
+- `merge_candidates` 与 `build_route_matrix` 明确归 Harness 所有，A2 不得越权生成全量矩阵。
