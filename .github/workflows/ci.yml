@@ -8,17 +8,27 @@ permissions:
   contents: read
 
 jobs:
-  baseline:
-    name: Documentation baseline
+  quality:
+    name: Format, lint, type and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify baseline files
-        shell: bash
-        run: |
-          test -f README.md
-          test -f docs/01-需求规格说明书.md
-          test -f docs/02-技术实现方案.md
-          test -f docs/03-教学式开发路线与Git交付计划.md
-          test -f LICENSE
-          test -f CONTRIBUTING.md
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "11.0.0"
+          run_install: false
+      - name: Install Python dependencies
+        run: uv sync --active --all-groups --frozen
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run the same checks as local development
+        run: pnpm check

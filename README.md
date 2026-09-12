@@ -15,6 +15,16 @@
 - 第一章“仓库与工程基础”：进行中（C00～C05）。
 - 后续将按 `docs/03-教学式开发路线与Git交付计划.md` 逐个检查点交付。
 
+## 本地质量检查
+
+项目要求 Python 3.12、Node.js 20～24、pnpm 10～11 和 `uv`。安装依赖后运行：
+
+```shell
+pnpm check
+```
+
+该命令依次执行格式检查、Lint、类型检查和测试，与 GitHub Actions 保持一致。
+
 ## 参与贡献
 
 请先阅读 [贡献指南](./CONTRIBUTING.md)。本项目采用 MIT License。

@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: Ruff format check
+        entry: uv run --active ruff format --check apps packages tests
+        language: system
+        pass_filenames: false
+      - id: ruff-lint
+        name: Ruff lint
+        entry: uv run --active ruff check apps packages tests
+        language: system
+        pass_filenames: false
+      - id: mypy
+        name: mypy
+        entry: uv run --active mypy
+        language: system
+        pass_filenames: false
+      - id: pytest
+        name: pytest
+        entry: uv run --active pytest
+        language: system
+        pass_filenames: false

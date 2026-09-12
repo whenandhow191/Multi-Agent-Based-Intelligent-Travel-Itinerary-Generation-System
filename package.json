@@ -1,0 +1,18 @@
+{
+  "name": "travel-agent-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.0.0",
+  "engines": {
+    "node": ">=20 <25",
+    "pnpm": ">=10 <12"
+  },
+  "scripts": {
+    "format": "uv run --active ruff format apps packages tests",
+    "format:check": "uv run --active ruff format --check apps packages tests",
+    "lint": "uv run --active ruff check apps packages tests",
+    "typecheck": "uv run --active mypy",
+    "test": "uv run --active pytest",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+  }
+}

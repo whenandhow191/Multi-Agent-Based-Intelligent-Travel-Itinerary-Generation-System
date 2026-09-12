@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.uv-cache/
 .coverage
 htmlcov/
 .venv/
@@ -12,6 +13,7 @@ htmlcov/
 
 # Node.js
 node_modules/
+.pnpm-store/
 dist/
 coverage/
 .vite/
