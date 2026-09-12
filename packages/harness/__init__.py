@@ -1,5 +1,15 @@
 """Self-hosted agent harness primitives and orchestration runtime."""
 
+from packages.harness.agent import (
+    AgentContext,
+    AgentErrorCode,
+    AgentExecutionError,
+    AgentRunResult,
+    AgentSpec,
+    BaseAgent,
+    EchoAgent,
+    EchoOutput,
+)
 from packages.harness.model_gateway import (
     FinishReason,
     MessageRole,
@@ -30,6 +40,14 @@ from packages.harness.tool_gateway import (
 )
 
 __all__ = [
+    "AgentContext",
+    "AgentErrorCode",
+    "AgentExecutionError",
+    "AgentRunResult",
+    "AgentSpec",
+    "BaseAgent",
+    "EchoAgent",
+    "EchoOutput",
     "FinishReason",
     "MessageRole",
     "ModelGateway",
