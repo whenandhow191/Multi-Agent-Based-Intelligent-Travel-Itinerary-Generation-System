@@ -148,7 +148,7 @@ def test_postgresql_lease_statement_uses_skip_locked_update_returning() -> None:
 
 
 def test_core_migration_tables_are_registered() -> None:
-    assert set(metadata.tables) == {"runs", "tasks", "task_dependencies", "events"}
+    assert {"runs", "tasks", "task_dependencies", "events"} <= set(metadata.tables)
     assert "ck_tasks_state" in {
         constraint.name for constraint in metadata.tables["tasks"].constraints
     }

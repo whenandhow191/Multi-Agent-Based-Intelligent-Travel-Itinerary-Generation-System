@@ -109,3 +109,50 @@ Index(
     tasks.c.priority,
 )
 Index("ix_events_run_created", events.c.run_id, events.c.created_at)
+
+checkpoints = Table(
+    "checkpoints",
+    metadata,
+    Column("checkpoint_id", String(120), primary_key=True),
+    Column("run_id", String(120), ForeignKey("runs.run_id", ondelete="CASCADE"), nullable=False),
+    Column(
+        "task_id",
+        String(120),
+        ForeignKey("tasks.task_id", ondelete="CASCADE"),
+        nullable=False,
+    ),
+    Column("step", Integer, nullable=False),
+    Column("context", JSON, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint("step >= 0", name="ck_checkpoints_step_nonnegative"),
+    UniqueConstraint("task_id", "step", name="uq_checkpoints_task_step"),
+)
+
+outbox_events = Table(
+    "outbox_events",
+    metadata,
+    Column("outbox_id", String(120), primary_key=True),
+    Column(
+        "event_id",
+        String(120),
+        ForeignKey("events.event_id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    ),
+    Column("topic", String(120), nullable=False),
+    Column("payload", JSON, nullable=False),
+    Column("available_at", DateTime(timezone=True), nullable=False),
+    Column("lease_owner", String(120), nullable=True),
+    Column("lease_until", DateTime(timezone=True), nullable=True),
+    Column("attempt", Integer, nullable=False, server_default="0"),
+    Column("published_at", DateTime(timezone=True), nullable=True),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint("attempt >= 0", name="ck_outbox_attempt_nonnegative"),
+)
+
+Index(
+    "ix_outbox_publish_candidates",
+    outbox_events.c.published_at,
+    outbox_events.c.available_at,
+    outbox_events.c.lease_until,
+)
