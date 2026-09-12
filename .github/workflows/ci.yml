@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    name: Documentation baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify baseline files
+        shell: bash
+        run: |
+          test -f README.md
+          test -f docs/01-需求规格说明书.md
+          test -f docs/02-技术实现方案.md
+          test -f docs/03-教学式开发路线与Git交付计划.md
+          test -f LICENSE
+          test -f CONTRIBUTING.md
