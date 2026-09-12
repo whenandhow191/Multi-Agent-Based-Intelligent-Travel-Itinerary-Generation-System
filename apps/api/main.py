@@ -1,0 +1,36 @@
+"""FastAPI application entry point and operational health endpoint."""
+
+from typing import Literal
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+
+class HealthResponse(BaseModel):
+    """Stable response returned by the API liveness endpoint."""
+
+    status: Literal["ok"]
+    service: str
+    version: str
+
+
+app = FastAPI(
+    title="Multi-Agent Travel Planner API",
+    version="0.1.0",
+    description="API surface for the self-hosted travel planning harness.",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/health", response_model=HealthResponse, tags=["operations"])
+async def health() -> HealthResponse:
+    """Return a dependency-free liveness signal for local runtime checks."""
+
+    return HealthResponse(status="ok", service="travel-api", version=app.version)

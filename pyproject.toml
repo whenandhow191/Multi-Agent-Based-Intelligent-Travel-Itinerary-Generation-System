@@ -4,10 +4,14 @@ version = "0.1.0"
 description = "A self-hosted multi-agent travel itinerary planning system"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
-dependencies = []
+dependencies = [
+  "fastapi>=0.116,<1",
+  "uvicorn[standard]>=0.35,<1",
+]
 
 [dependency-groups]
 dev = [
+  "httpx>=0.28,<1",
   "mypy>=1.17,<2",
   "pre-commit>=4.3,<5",
   "pytest>=8.4,<9",

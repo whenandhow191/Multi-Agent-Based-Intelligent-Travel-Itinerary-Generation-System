@@ -2,17 +2,18 @@
   "name": "travel-agent-workspace",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.0.0",
+  "packageManager": "pnpm@11.19.0",
   "engines": {
     "node": ">=20 <25",
     "pnpm": ">=10 <12"
   },
   "scripts": {
-    "format": "uv run --active ruff format apps packages tests",
-    "format:check": "uv run --active ruff format --check apps packages tests",
-    "lint": "uv run --active ruff check apps packages tests",
-    "typecheck": "uv run --active mypy",
-    "test": "uv run --active pytest",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "format": "uv run --active ruff format apps packages tests && pnpm --filter @travel/web format",
+    "format:check": "uv run --active ruff format --check apps packages tests && pnpm --filter @travel/web format:check",
+    "lint": "uv run --active ruff check apps packages tests && pnpm --filter @travel/web lint",
+    "typecheck": "uv run --active mypy && pnpm --filter @travel/web typecheck",
+    "test": "uv run --active pytest && pnpm --filter @travel/web test",
+    "build": "pnpm --filter @travel/web build",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   }
 }

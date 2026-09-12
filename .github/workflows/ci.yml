@@ -24,7 +24,7 @@ jobs:
           node-version: "22"
       - uses: pnpm/action-setup@v4
         with:
-          version: "11.0.0"
+          version: "11.19.0"
           run_install: false
       - name: Install Python dependencies
         run: uv sync --active --all-groups --frozen
