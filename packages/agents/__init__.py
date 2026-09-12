@@ -14,6 +14,15 @@ from packages.agents.destination_intelligence import (
     DestinationIntelligenceAgent,
     DestinationResearchArtifact,
 )
+from packages.agents.mobility_lodging import (
+    MOBILITY_LODGING_TOOL_ALLOWLIST,
+    ConnectionRisk,
+    LogisticsArtifact,
+    MobilityLodgingAgent,
+    MobilityLodgingArtifact,
+    ProviderFailure,
+    RouteScope,
+)
 
 __all__ = [
     "CoordinatorAction",
@@ -25,5 +34,12 @@ __all__ = [
     "DestinationIntelligenceAgent",
     "DestinationResearchArtifact",
     "DispatchBudget",
+    "MOBILITY_LODGING_TOOL_ALLOWLIST",
+    "ConnectionRisk",
+    "LogisticsArtifact",
+    "MobilityLodgingAgent",
+    "MobilityLodgingArtifact",
+    "ProviderFailure",
+    "RouteScope",
     "TaskBlueprint",
 ]
