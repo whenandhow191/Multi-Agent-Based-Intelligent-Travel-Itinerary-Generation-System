@@ -41,9 +41,7 @@ def test_profiled_gateway_applies_yaml_controls_without_agent_code_change() -> N
             200,
             json={
                 "model": "deepseek-flash",
-                "output": [
-                    {"type": "message", "content": [{"type": "output_text", "text": "{}"}]}
-                ],
+                "output": [{"type": "message", "content": [{"type": "output_text", "text": "{}"}]}],
             },
         )
 

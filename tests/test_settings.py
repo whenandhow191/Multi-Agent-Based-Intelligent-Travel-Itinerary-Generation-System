@@ -48,3 +48,16 @@ def test_doctor_reports_presence_without_secret_values() -> None:
     assert "OPENAI_API_KEY: present (optional)" in output
     assert secret not in output
     assert secret not in repr(settings)
+
+
+def test_doctor_reports_deepseek_presence_without_secret_value() -> None:
+    """The default model credential gets the same redaction guarantee."""
+
+    secret = "deepseek-super-secret-value"
+    settings = Settings(deepseek_api_key=SecretStr(secret))
+
+    output = render_doctor(settings)
+
+    assert "DEEPSEEK_API_KEY: present (optional)" in output
+    assert secret not in output
+    assert secret not in repr(settings)

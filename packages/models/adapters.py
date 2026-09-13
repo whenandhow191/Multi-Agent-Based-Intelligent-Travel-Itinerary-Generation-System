@@ -79,9 +79,7 @@ class ResponsesProvider(ModelGateway):
         if self.api_key is not None and self.api_key.get_secret_value().strip():
             headers["Authorization"] = f"Bearer {self.api_key.get_secret_value()}"
         elif self.require_api_key:
-            raise ModelProviderError(
-                ProviderFailureKind.AUTH, self.provider_id, retryable=False
-            )
+            raise ModelProviderError(ProviderFailureKind.AUTH, self.provider_id, retryable=False)
         try:
             response = await self.client.post(
                 f"{self.base_url}{path}", json=payload, headers=headers
@@ -103,9 +101,7 @@ class ResponsesProvider(ModelGateway):
 class OpenAIResponsesProvider(ResponsesProvider):
     """OpenAI Responses adapter with server-side key handling."""
 
-    def __init__(
-        self, *, model_id: str, client: httpx.AsyncClient, api_key: SecretStr
-    ) -> None:
+    def __init__(self, *, model_id: str, client: httpx.AsyncClient, api_key: SecretStr) -> None:
         super().__init__(
             provider_id="openai",
             base_url="https://api.openai.com/v1",
@@ -181,8 +177,7 @@ def _chat_payload(request: ModelRequest, model_id: str) -> dict[str, JsonValue]:
     payload: dict[str, JsonValue] = {
         "model": model_id,
         "messages": [
-            _chat_message(item.role, item.content, item.tool_call_id)
-            for item in request.messages
+            _chat_message(item.role, item.content, item.tool_call_id) for item in request.messages
         ],
         "tools": [
             {

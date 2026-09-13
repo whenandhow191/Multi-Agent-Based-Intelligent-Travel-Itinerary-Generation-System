@@ -27,9 +27,7 @@ class SequenceGateway(ModelGateway):
 
 
 def _success(model: str = "gpt-5.6-terra") -> ModelTurn:
-    return ModelTurn(
-        output={"message": "ok"}, finish_reason=FinishReason.STOP, model_id=model
-    )
+    return ModelTurn(output={"message": "ok"}, finish_reason=FinishReason.STOP, model_id=model)
 
 
 def _failure(kind: ProviderFailureKind, provider: str = "deepseek") -> ModelProviderError:
@@ -79,9 +77,7 @@ def test_rate_limit_retries_then_escalates_to_gpt() -> None:
 
 
 def test_schema_failure_switches_candidate_without_retry() -> None:
-    invalid = ModelTurn(
-        output={}, finish_reason=FinishReason.STOP, model_id="deepseek-flash"
-    )
+    invalid = ModelTurn(output={}, finish_reason=FinishReason.STOP, model_id="deepseek-flash")
     request = build_request().model_copy(
         update={
             "output_schema": {
