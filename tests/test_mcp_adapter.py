@@ -47,6 +47,23 @@ class FakeMcpTransport:
         return None
 
 
+class PagedMcpTransport(FakeMcpTransport):
+    async def request(self, method: str, params: Mapping[str, JsonValue]) -> dict[str, JsonValue]:
+        if method != "tools/list":
+            return await super().request(method, params)
+        self.calls.append((method, params))
+        if params.get("cursor") == "page_2":
+            return {
+                "tools": [
+                    {"name": "second-tool", "inputSchema": {"type": "object"}},
+                ]
+            }
+        return {
+            "tools": [{"name": "first-tool", "inputSchema": {"type": "object"}}],
+            "nextCursor": "page_2",
+        }
+
+
 def _context() -> ToolContext:
     return ToolContext(
         run_id="test_run",
@@ -63,20 +80,21 @@ def test_discovery_maps_names_filters_permissions_and_calls_through_gateway() ->
         transport="stdio",
         command=("fake-server",),
         allowed_tools=("get-weather",),
+        name_mapping={"get-weather": "weather.forecast"},
     )
     adapter = McpAdapter(config, transport)
     definitions = asyncio.run(adapter.discover())
-    assert [item.name for item in definitions] == ["mcp.weather_get_weather"]
-    assert set(adapter.schema_snapshot) == {"mcp.weather_get_weather"}
+    assert [item.name for item in definitions] == ["weather.forecast"]
+    assert set(adapter.schema_snapshot) == {"weather.forecast"}
 
     gateway = ToolGateway(ToolRegistry(definitions))
     result = asyncio.run(
         gateway.execute(
             call_id="mcp_call",
-            tool_name="mcp.weather_get_weather",
+            tool_name="weather.forecast",
             arguments={"city": "Chengdu"},
             context=_context(),
-            allowlist=("mcp.weather_get_weather",),
+            allowlist=("weather.forecast",),
         )
     )
     assert result.data["is_error"] is False
@@ -108,6 +126,25 @@ def test_discovered_schema_rejects_missing_required_input() -> None:
         pass
     else:
         raise AssertionError("missing required MCP argument must be rejected")
+
+
+def test_discovery_reads_all_bounded_pages() -> None:
+    transport = PagedMcpTransport()
+    adapter = McpAdapter(
+        McpServerConfig(
+            server_name="paged",
+            transport="stdio",
+            command=("fake-server",),
+            allowed_tools=("first-tool", "second-tool"),
+        ),
+        transport,
+    )
+
+    definitions = asyncio.run(adapter.discover())
+
+    assert [item.name for item in definitions] == ["mcp.paged_first_tool", "mcp.paged_second_tool"]
+    list_calls = [call for call in transport.calls if call[0] == "tools/list"]
+    assert list_calls[1][1] == {"cursor": "page_2"}
 
 
 def test_streamable_http_negotiates_session_and_accepts_sse() -> None:

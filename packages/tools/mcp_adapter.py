@@ -27,6 +27,7 @@ class McpServerConfig(DomainModel):
     command: tuple[NonEmptyText, ...] = ()
     url: AnyHttpUrl | None = None
     allowed_tools: tuple[NonEmptyText, ...]
+    name_mapping: dict[NonEmptyText, NonEmptyText] = Field(default_factory=dict)
     timeout_seconds: Annotated[float, Field(gt=0, le=120)] = 20
     max_response_bytes: Annotated[int, Field(ge=1_024, le=10_000_000)] = 1_000_000
 
@@ -226,12 +227,24 @@ class McpAdapter:
         if initialized.get("protocolVersion") != MCP_PROTOCOL_VERSION:
             raise McpAdapterError("MCP server selected an unsupported protocol version")
         await self.transport.notify("notifications/initialized", {})
-        result = await asyncio.wait_for(
-            self.transport.request("tools/list", {}), timeout=self.config.timeout_seconds
-        )
-        raw_tools = result.get("tools")
-        if not isinstance(raw_tools, list):
-            raise McpAdapterError("MCP tools/list did not return a tools array")
+        raw_tools: list[JsonValue] = []
+        cursor: str | None = None
+        for _ in range(20):
+            params: dict[str, JsonValue] = {} if cursor is None else {"cursor": cursor}
+            result = await asyncio.wait_for(
+                self.transport.request("tools/list", params),
+                timeout=self.config.timeout_seconds,
+            )
+            page = result.get("tools")
+            if not isinstance(page, list):
+                raise McpAdapterError("MCP tools/list did not return a tools array")
+            raw_tools.extend(page)
+            next_cursor = result.get("nextCursor")
+            if not isinstance(next_cursor, str) or not next_cursor:
+                break
+            cursor = next_cursor
+        else:
+            raise McpAdapterError("MCP tools/list exceeded the pagination limit")
         definitions: list[ToolDefinition] = []
         allowed = set(self.config.allowed_tools)
         for raw_tool in raw_tools:
@@ -244,7 +257,9 @@ class McpAdapter:
             if not isinstance(input_schema, dict):
                 raise McpAdapterError(f"MCP tool {remote_name} has no object inputSchema")
             schema = cast(dict[str, JsonValue], json.loads(json.dumps(input_schema)))
-            local_name = _local_tool_name(self.config.server_name, remote_name)
+            local_name = self.config.name_mapping.get(remote_name) or _local_tool_name(
+                self.config.server_name, remote_name
+            )
             input_model = _model_from_schema(local_name, schema)
             description = raw_tool.get("description")
             definitions.append(
