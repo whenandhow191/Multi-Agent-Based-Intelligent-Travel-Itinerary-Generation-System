@@ -29,6 +29,9 @@ def inspect_configuration(settings: Settings) -> tuple[ConfigurationCheck, ...]:
         ConfigurationCheck("DATABASE_URL", _secret_is_present(settings.database_url), True),
         ConfigurationCheck("OPENAI_API_KEY", _secret_is_present(settings.openai_api_key), False),
         ConfigurationCheck(
+            "DEEPSEEK_API_KEY", _secret_is_present(settings.deepseek_api_key), False
+        ),
+        ConfigurationCheck(
             "AMAP_WEB_SERVICE_KEY", _secret_is_present(settings.amap_web_service_key), False
         ),
         ConfigurationCheck("AMAP_JS_KEY", _secret_is_present(settings.amap_js_key), False),

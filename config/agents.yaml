@@ -1,0 +1,72 @@
+agents:
+  coordinator:
+    default:
+      provider: deepseek
+      model: deepseek-flash
+      reasoning: high
+      max_output_tokens: 5000
+      timeout_seconds: 120
+    advanced:
+      provider: openai
+      model: gpt-5.6-sol
+      reasoning: high
+      max_output_tokens: 6000
+      timeout_seconds: 120
+    flagship:
+      provider: openai
+      model: gpt-6-astra
+      reasoning: high
+      max_output_tokens: 6000
+      timeout_seconds: 150
+  destination_intelligence:
+    default:
+      provider: deepseek
+      model: deepseek-flash
+      reasoning: low
+      max_output_tokens: 2400
+      timeout_seconds: 90
+    advanced:
+      provider: openai
+      model: gpt-5.6-luna
+      reasoning: low
+      max_output_tokens: 2400
+      timeout_seconds: 90
+  mobility_lodging:
+    default:
+      provider: deepseek
+      model: deepseek-flash
+      reasoning: low
+      max_output_tokens: 2600
+      timeout_seconds: 100
+    advanced:
+      provider: openai
+      model: gpt-5.6-terra
+      reasoning: low
+      max_output_tokens: 3000
+      timeout_seconds: 110
+  itinerary_planner:
+    default:
+      provider: deepseek
+      model: deepseek-flash
+      reasoning: high
+      max_output_tokens: 5000
+      timeout_seconds: 120
+    advanced:
+      provider: openai
+      model: gpt-5.6-terra
+      reasoning: medium
+      max_output_tokens: 5000
+      timeout_seconds: 120
+  critic:
+    default:
+      provider: deepseek
+      model: deepseek-flash
+      reasoning: high
+      max_output_tokens: 3200
+      timeout_seconds: 100
+    advanced:
+      provider: openai
+      model: gpt-5.6-terra
+      reasoning: high
+      max_output_tokens: 3600
+      timeout_seconds: 110
