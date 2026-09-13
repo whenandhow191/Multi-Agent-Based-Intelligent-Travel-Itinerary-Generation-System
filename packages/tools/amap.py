@@ -121,8 +121,7 @@ class AmapAdapter:
         body = _successful_mapping(payload)
         now = self._now()
         normalized = tuple(
-            _place(item, now, index)
-            for index, item in enumerate(_mapping_list(body.get("pois")))
+            _place(item, now, index) for index, item in enumerate(_mapping_list(body.get("pois")))
         )
         places = normalized[: request.limit]
         evidence = tuple(item[1] for item in places)

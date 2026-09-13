@@ -70,9 +70,7 @@ def test_live_route_normalizes_provider_result_and_polyline() -> None:
                         {
                             "distance": "1200",
                             "duration": "900",
-                            "steps": [
-                                {"polyline": "116.397000,39.908000;116.407000,39.918000"}
-                            ],
+                            "steps": [{"polyline": "116.397000,39.908000;116.407000,39.918000"}],
                         }
                     ]
                 },

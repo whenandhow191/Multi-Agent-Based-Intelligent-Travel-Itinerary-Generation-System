@@ -19,6 +19,16 @@ from packages.tools.http_provider import (
     ProviderUnavailableError,
     ResilientHttpProvider,
 )
+from packages.tools.mcp_adapter import (
+    MCP_PROTOCOL_VERSION,
+    McpAdapter,
+    McpAdapterError,
+    McpServerConfig,
+    McpToolOutput,
+    StdioMcpTransport,
+    StreamableHttpMcpTransport,
+)
+from packages.tools.registry import build_default_registry, default_tool_definitions
 from packages.tools.routes import (
     AmapRouteAdapter,
     MapPolyline,
@@ -60,6 +70,11 @@ __all__ = [
     "GeocodeOutput",
     "HttpProviderPolicy",
     "MemoryAuditSink",
+    "MCP_PROTOCOL_VERSION",
+    "McpAdapter",
+    "McpAdapterError",
+    "McpServerConfig",
+    "McpToolOutput",
     "MapPolyline",
     "LodgingProvider",
     "LodgingSearchInput",
@@ -79,7 +94,11 @@ __all__ = [
     "RouteEndpoint",
     "RouteMatrixInput",
     "RouteMatrixOutput",
+    "StdioMcpTransport",
+    "StreamableHttpMcpTransport",
     "WeatherForecastInput",
     "WeatherForecastOutput",
+    "build_default_registry",
+    "default_tool_definitions",
     "to_gcj02",
 ]

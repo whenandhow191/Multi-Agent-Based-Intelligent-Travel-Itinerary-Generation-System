@@ -39,9 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("run_id")
 
     blackboard_parser = commands.add_parser("blackboard", help="read immutable Artifacts")
-    blackboard_commands = blackboard_parser.add_subparsers(
-        dest="blackboard_command", required=True
-    )
+    blackboard_commands = blackboard_parser.add_subparsers(dest="blackboard_command", required=True)
     get = blackboard_commands.add_parser("get", help="read one exact Artifact version")
     get.add_argument("--run-id", required=True)
     get.add_argument("--task-id", required=True)
@@ -103,8 +101,8 @@ async def _inspect_run(engine: AsyncEngine, run_id: str) -> int:
         )
         if run is None:
             return 1
-        task_rows = (await connection.execute(select(tasks).where(tasks.c.run_id == run_id)))
-        event_rows = (await connection.execute(select(events).where(events.c.run_id == run_id)))
+        task_rows = await connection.execute(select(tasks).where(tasks.c.run_id == run_id))
+        event_rows = await connection.execute(select(events).where(events.c.run_id == run_id))
         tasks_payload = [dict(row) for row in task_rows.mappings().all()]
         events_payload = [dict(row) for row in event_rows.mappings().all()]
     print(_json({"run": dict(run), "tasks": tasks_payload, "events": events_payload}))

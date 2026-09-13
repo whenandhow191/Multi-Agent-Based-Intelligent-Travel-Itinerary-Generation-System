@@ -130,8 +130,7 @@ class FixtureTravelProviders:
         return RailOfficialLinkOutput(
             url=f"https://www.12306.cn/index/?{query}",
             warning=(
-                "Official-site handoff only; no schedule, inventory, login, "
-                "or purchase automation."
+                "Official-site handoff only; no schedule, inventory, login, or purchase automation."
             ),
         )
 
