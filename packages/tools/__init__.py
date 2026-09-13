@@ -29,6 +29,11 @@ from packages.tools.routes import (
     RouteMatrixOutput,
     to_gcj02,
 )
+from packages.tools.weather import (
+    OpenMeteoAdapter,
+    WeatherForecastInput,
+    WeatherForecastOutput,
+)
 
 __all__ = [
     "AmapAdapter",
@@ -41,6 +46,7 @@ __all__ = [
     "HttpProviderPolicy",
     "MemoryAuditSink",
     "MapPolyline",
+    "OpenMeteoAdapter",
     "PlaceSearchInput",
     "PlaceSearchOutput",
     "ProviderCallAudit",
@@ -53,5 +59,7 @@ __all__ = [
     "RouteEndpoint",
     "RouteMatrixInput",
     "RouteMatrixOutput",
+    "WeatherForecastInput",
+    "WeatherForecastOutput",
     "to_gcj02",
 ]
