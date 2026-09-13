@@ -1,5 +1,10 @@
 """Deterministic 1+4 workflow orchestration and finalization."""
 
+from packages.workflow.final_aggregator import (
+    FinalAggregationError,
+    FinalAggregationResult,
+    FinalAggregator,
+)
 from packages.workflow.orchestrator import (
     OnePlusFourWorkflow,
     RouteMatrixArtifact,
@@ -18,6 +23,9 @@ from packages.workflow.repair import (
 )
 
 __all__ = [
+    "FinalAggregationError",
+    "FinalAggregationResult",
+    "FinalAggregator",
     "OnePlusFourWorkflow",
     "RouteMatrixArtifact",
     "RepairExecutionContext",
