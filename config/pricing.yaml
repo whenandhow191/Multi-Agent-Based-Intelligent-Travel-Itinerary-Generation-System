@@ -1,0 +1,32 @@
+currency: USD
+models:
+  deepseek-flash:
+    provider: deepseek
+    input_per_million_microunits: 140000
+    cached_input_per_million_microunits: 2800
+    output_per_million_microunits: 280000
+  gpt-5.6-luna:
+    provider: openai
+    input_per_million_microunits: 200000
+    cached_input_per_million_microunits: 20000
+    output_per_million_microunits: 1200000
+  gpt-5.6-terra:
+    provider: openai
+    input_per_million_microunits: 2000000
+    cached_input_per_million_microunits: 200000
+    output_per_million_microunits: 12000000
+  gpt-5.6-sol:
+    provider: openai
+    input_per_million_microunits: 4000000
+    cached_input_per_million_microunits: 400000
+    output_per_million_microunits: 20000000
+  gpt-6-astra:
+    provider: openai
+    input_per_million_microunits: 10000000
+    cached_input_per_million_microunits: 1000000
+    output_per_million_microunits: 50000000
+tools:
+  maps.geocode: 0
+  places.search: 0
+  routes.compute: 0
+  weather.forecast: 0

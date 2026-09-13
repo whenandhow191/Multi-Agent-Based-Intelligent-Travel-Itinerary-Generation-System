@@ -93,6 +93,8 @@ class AgentRunResult[OutputT: BaseModel]:
     usage: ModelUsage
     steps: int
     tool_calls: int
+    partial: bool = False
+    budget_exceeded_scopes: tuple[Identifier, ...] = ()
 
 
 class BaseAgent[OutputT: BaseModel]:
@@ -124,6 +126,8 @@ class BaseAgent[OutputT: BaseModel]:
     async def _run_bounded(self, context: AgentContext) -> AgentRunResult[OutputT]:
         usage = ModelUsage()
         tool_call_count = 0
+        partial = False
+        exceeded_scopes: set[str] = set()
         current = context
         system_message = ModelMessage(
             role=MessageRole.SYSTEM,
@@ -156,6 +160,9 @@ class BaseAgent[OutputT: BaseModel]:
                     retryable=True,
                 ) from exc
             usage = usage.add(turn.usage)
+            if turn.budget_status == "partial":
+                partial = True
+                exceeded_scopes.update(turn.budget_exceeded_scopes)
 
             if turn.tool_calls:
                 tool_call_count += len(turn.tool_calls)
@@ -227,6 +234,8 @@ class BaseAgent[OutputT: BaseModel]:
                 usage=usage,
                 steps=step,
                 tool_calls=tool_call_count,
+                partial=partial,
+                budget_exceeded_scopes=tuple(sorted(exceeded_scopes)),
             )
 
         raise AgentExecutionError(

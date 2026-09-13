@@ -122,6 +122,8 @@ class ModelTurn(DomainModel):
     usage: ModelUsage = ModelUsage()
     finish_reason: FinishReason
     model_id: ShortText
+    budget_status: Literal["within", "partial"] = "within"
+    budget_exceeded_scopes: tuple[Identifier, ...] = ()
 
     @model_validator(mode="after")
     def finish_reason_matches_payload(self) -> "ModelTurn":
