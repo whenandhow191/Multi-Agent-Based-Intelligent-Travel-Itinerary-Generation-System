@@ -11,6 +11,7 @@ from pydantic import AnyHttpUrl, Field, SecretStr, StringConstraints
 from packages.domain.common import DomainModel, Identifier, NonEmptyText
 from packages.harness import ModelGateway, ModelPolicy, ModelRequest, ModelTurn
 from packages.models.adapters import OllamaProvider, OpenAICompatibleProvider, ResponsesProvider
+from packages.models.routing import ModelCandidate, ModelRoutingPolicy, RoutedModelGateway
 
 ReasoningEffort = Literal["none", "low", "medium", "high", "xhigh", "max"]
 ProfileTier = Literal["default", "advanced", "flagship"]
@@ -160,6 +161,37 @@ class ModelProfileRegistry:
                 api_key=api_key,
             )
         return ProfiledModelGateway(profile, gateway)
+
+    def build_routed_gateway(
+        self,
+        agent_id: str,
+        client: httpx.AsyncClient,
+        environment: Mapping[str, str],
+        *,
+        tiers: tuple[ProfileTier, ...] = ("default", "advanced", "flagship"),
+        policy: ModelRoutingPolicy | None = None,
+    ) -> RoutedModelGateway:
+        candidates: list[ModelCandidate] = []
+        tier_numbers: dict[ProfileTier, Literal[0, 1, 2]] = {
+            "default": 0,
+            "advanced": 1,
+            "flagship": 2,
+        }
+        for tier in tiers:
+            try:
+                profile = self.resolve(agent_id, tier)
+            except KeyError:
+                continue
+            candidates.append(
+                ModelCandidate(
+                    provider_id=profile.provider_id,
+                    model_id=profile.model_id,
+                    tier=tier_numbers[tier],
+                    gateway=self.build_gateway(agent_id, client, environment, tier),
+                    max_attempts=2 if tier == tiers[0] else 1,
+                )
+            )
+        return RoutedModelGateway(agent_id=agent_id, candidates=candidates, policy=policy)
 
 
 def load_default_profiles(project_root: Path | None = None) -> ModelProfileRegistry:

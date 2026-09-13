@@ -28,6 +28,12 @@ from packages.models.profiles import (
     ResolvedModelProfile,
     load_default_profiles,
 )
+from packages.models.routing import (
+    ModelCandidate,
+    ModelRoutingError,
+    ModelRoutingPolicy,
+    RoutedModelGateway,
+)
 
 __all__ = [
     "ModelProviderError",
@@ -48,8 +54,12 @@ __all__ = [
     "BudgetedModelGateway",
     "BudgetLimits",
     "ModelPrice",
+    "ModelCandidate",
     "PriceBook",
     "UsageEntry",
     "UsageLedger",
+    "ModelRoutingError",
+    "ModelRoutingPolicy",
+    "RoutedModelGateway",
     "load_default_profiles",
 ]

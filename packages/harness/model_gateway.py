@@ -114,6 +114,25 @@ class ModelToolCall(DomainModel):
     arguments: dict[str, JsonValue] = Field(default_factory=dict)
 
 
+class ModelRouteAttempt(DomainModel):
+    """One provider attempt retained without prompts, keys or raw responses."""
+
+    provider_id: Identifier
+    model_id: ShortText
+    outcome: Identifier
+
+
+class ModelRouting(DomainModel):
+    """Bounded routing decision attached to a successful normalized turn."""
+
+    selected_provider: Identifier
+    selected_model: ShortText
+    attempts: tuple[ModelRouteAttempt, ...]
+    fallback_used: bool
+    escalation_used: bool
+    brain_downgraded: bool = False
+
+
 class ModelTurn(DomainModel):
     """One normalized provider response."""
 
@@ -124,6 +143,7 @@ class ModelTurn(DomainModel):
     model_id: ShortText
     budget_status: Literal["within", "partial"] = "within"
     budget_exceeded_scopes: tuple[Identifier, ...] = ()
+    routing: ModelRouting | None = None
 
     @model_validator(mode="after")
     def finish_reason_matches_payload(self) -> "ModelTurn":
