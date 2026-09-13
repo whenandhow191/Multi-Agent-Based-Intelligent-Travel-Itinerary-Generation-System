@@ -1,7 +1,7 @@
 """Provider-neutral model request, response, usage, and gateway contracts."""
 
 from enum import StrEnum
-from typing import Annotated, Protocol, runtime_checkable
+from typing import Annotated, Literal, Protocol, runtime_checkable
 
 from pydantic import Field, JsonValue, StringConstraints, model_validator
 
@@ -62,6 +62,7 @@ class ModelPolicy(DomainModel):
     """Portable generation limits selected by task policy."""
 
     model_alias: ShortText
+    reasoning_effort: Literal["none", "low", "medium", "high", "xhigh", "max"] = "low"
     temperature: Annotated[float, Field(ge=0, le=2)] = 0
     max_output_tokens: Annotated[int, Field(ge=1, le=128_000)] = 4096
     timeout_seconds: Annotated[float, Field(gt=0, le=600)] = 60
