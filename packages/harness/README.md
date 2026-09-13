@@ -12,6 +12,8 @@
 - `scheduler.py`：任务 DAG 校验、依赖就绪判断、有限并行、协作取消、超时和有限重试。
 - `persistence/`：Repository 协议、内存契约实现、PostgreSQL Schema、原子任务租约和幂等事件。
 - `recovery.py`：租约 heartbeat、不可变检查点、过期任务恢复和 Transactional Outbox 发布。
+- `blackboard.py`：版本化 Artifact 接口、内存实现、PostgreSQL 事务版本头和 lineage 查询。
+- `blackboard_cli.py`：按 `run_id/task_id/type/version` 写入或读取 PostgreSQL Artifact 的最小诊断 CLI。
 
 数据库升级：
 

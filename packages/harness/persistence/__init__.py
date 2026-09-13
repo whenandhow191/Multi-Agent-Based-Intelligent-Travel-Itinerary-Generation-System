@@ -12,6 +12,9 @@ from packages.harness.persistence.repository import (
     build_lease_statement,
 )
 from packages.harness.persistence.schema import (
+    artifact_heads,
+    artifact_parents,
+    artifacts,
     checkpoints,
     events,
     metadata,
@@ -31,6 +34,9 @@ __all__ = [
     "RunRecord",
     "TaskRecord",
     "build_lease_statement",
+    "artifact_heads",
+    "artifact_parents",
+    "artifacts",
     "checkpoints",
     "events",
     "metadata",

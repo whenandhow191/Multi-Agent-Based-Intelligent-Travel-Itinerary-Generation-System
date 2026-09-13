@@ -10,6 +10,15 @@ from packages.harness.agent import (
     EchoAgent,
     EchoOutput,
 )
+from packages.harness.blackboard import (
+    ArtifactNotFoundError,
+    ArtifactRecord,
+    ArtifactVersionConflictError,
+    Blackboard,
+    MemoryBlackboard,
+    PostgresBlackboard,
+    artifact_content_hash,
+)
 from packages.harness.model_gateway import (
     FinishReason,
     MessageRole,
@@ -75,6 +84,10 @@ __all__ = [
     "AgentExecutionError",
     "AgentRunResult",
     "AgentSpec",
+    "ArtifactNotFoundError",
+    "ArtifactRecord",
+    "ArtifactVersionConflictError",
+    "Blackboard",
     "BaseAgent",
     "CancellationToken",
     "CheckpointManager",
@@ -88,6 +101,7 @@ __all__ = [
     "HeartbeatService",
     "LeaseLostError",
     "MessageRole",
+    "MemoryBlackboard",
     "MemoryHarnessRepository",
     "ModelGateway",
     "ModelMessage",
@@ -101,6 +115,7 @@ __all__ = [
     "OutboxRecord",
     "PermanentTaskError",
     "PostgresHarnessRepository",
+    "PostgresBlackboard",
     "RetryableTaskError",
     "RecoveryCoordinator",
     "RunRecord",
@@ -126,4 +141,5 @@ __all__ = [
     "ToolPermissionError",
     "ToolRegistry",
     "fixture_echo_tool",
+    "artifact_content_hash",
 ]

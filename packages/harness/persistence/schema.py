@@ -110,6 +110,62 @@ Index(
 )
 Index("ix_events_run_created", events.c.run_id, events.c.created_at)
 
+artifact_heads = Table(
+    "artifact_heads",
+    metadata,
+    Column("run_id", String(120), ForeignKey("runs.run_id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "task_id", String(120), ForeignKey("tasks.task_id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column("artifact_type", String(120), primary_key=True),
+    Column("current_version", Integer, nullable=False, server_default="0"),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint("current_version >= 0", name="ck_artifact_heads_version_nonnegative"),
+)
+
+artifacts = Table(
+    "artifacts",
+    metadata,
+    Column("artifact_id", String(120), primary_key=True),
+    Column("run_id", String(120), ForeignKey("runs.run_id", ondelete="CASCADE"), nullable=False),
+    Column("task_id", String(120), ForeignKey("tasks.task_id", ondelete="CASCADE"), nullable=False),
+    Column("artifact_type", String(120), nullable=False),
+    Column("schema_version", String(16), nullable=False),
+    Column("version", Integer, nullable=False),
+    Column("producer_agent", String(120), nullable=False),
+    Column("content_hash", String(71), nullable=False),
+    Column("payload", JSON, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint("version >= 1", name="ck_artifacts_version_positive"),
+    UniqueConstraint(
+        "run_id",
+        "task_id",
+        "artifact_type",
+        "version",
+        name="uq_artifacts_logical_version",
+    ),
+)
+
+artifact_parents = Table(
+    "artifact_parents",
+    metadata,
+    Column(
+        "artifact_id",
+        String(120),
+        ForeignKey("artifacts.artifact_id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "parent_artifact_id",
+        String(120),
+        ForeignKey("artifacts.artifact_id", ondelete="RESTRICT"),
+        primary_key=True,
+    ),
+    CheckConstraint("artifact_id <> parent_artifact_id", name="ck_artifact_parents_not_self"),
+)
+
+Index("ix_artifacts_run_type", artifacts.c.run_id, artifacts.c.artifact_type)
+
 checkpoints = Table(
     "checkpoints",
     metadata,
