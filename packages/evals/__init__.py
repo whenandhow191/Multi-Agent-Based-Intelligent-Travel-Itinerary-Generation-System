@@ -10,6 +10,13 @@ from packages.evals.model_benchmark import (
     ModelBenchmarkRunner,
     load_benchmark_cases,
 )
+from packages.evals.resilience import (
+    Probe,
+    ProbeOutcome,
+    ResilienceReport,
+    ResilienceSample,
+    ResilienceSuite,
+)
 from packages.evals.scripted_gateway import ScriptedModelGateway
 from packages.evals.scripted_model import (
     FinishReason,
@@ -36,6 +43,11 @@ __all__ = [
     "ModelBenchmarkCase",
     "ModelBenchmarkReport",
     "ModelBenchmarkRunner",
+    "Probe",
+    "ProbeOutcome",
+    "ResilienceReport",
+    "ResilienceSample",
+    "ResilienceSuite",
     "SyntheticScenario",
     "build_synthetic_scenario",
     "load_benchmark_cases",

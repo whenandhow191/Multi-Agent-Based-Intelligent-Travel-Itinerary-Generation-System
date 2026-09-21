@@ -6,6 +6,7 @@ from hashlib import sha256
 from hmac import compare_digest, digest
 from json import dumps
 from secrets import token_bytes, token_hex
+from threading import RLock
 
 from apps.api.run_models import (
     ClarificationAnswer,
@@ -64,8 +65,15 @@ class InMemoryTripRunService:
         self._runs: dict[str, StoredTripRun] = {}
         self._idempotency: dict[str, tuple[str, str]] = {}
         self._token_secret = token_bytes(32)
+        self._create_lock = RLock()
 
     def create(self, request: TripRequest, idempotency_key: str) -> TripRunCreated:
+        """Create once per idempotency key, including under concurrent API workers."""
+
+        with self._create_lock:
+            return self._create_locked(request, idempotency_key)
+
+    def _create_locked(self, request: TripRequest, idempotency_key: str) -> TripRunCreated:
         self._validate_fixture_request(request)
         request_digest = sha256(
             dumps(request.model_dump(mode="json"), sort_keys=True).encode()
