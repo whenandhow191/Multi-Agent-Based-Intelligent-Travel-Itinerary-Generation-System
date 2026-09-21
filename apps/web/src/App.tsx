@@ -1,31 +1,48 @@
 import { useEffect, useState } from "react";
 
-type ApiState = "checking" | "online" | "offline";
+import { checkHealth, createRun } from "./api";
+import { RunStatus } from "./components/RunStatus";
+import { TripRequestForm } from "./components/TripRequestForm";
+import type { ApiProblem, RunSession, TripRequestInput } from "./types";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+type ApiState = "checking" | "online" | "offline";
 
 export default function App() {
   const [apiState, setApiState] = useState<ApiState>("checking");
+  const [session, setSession] = useState<RunSession | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [problem, setProblem] = useState<ApiProblem | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-
-    fetch(`${apiBaseUrl}/health`, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("API health check failed");
-        }
-        setApiState("online");
-      })
+    checkHealth(controller.signal)
+      .then(() => setApiState("online"))
       .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") {
+        if (error instanceof DOMException && error.name === "AbortError")
           return;
-        }
         setApiState("offline");
       });
-
     return () => controller.abort();
   }, []);
+
+  async function submit(input: TripRequestInput) {
+    setSubmitting(true);
+    setProblem(null);
+    try {
+      const created = await createRun(input);
+      setSession(created);
+      sessionStorage.setItem(
+        `travel-run:${created.run.run_id}`,
+        created.accessToken,
+      );
+    } catch (error) {
+      setProblem({
+        message: error instanceof Error ? error.message : "无法创建旅行方案",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const stateLabel = {
     checking: "正在检查 API",
@@ -34,20 +51,49 @@ export default function App() {
   }[apiState];
 
   return (
-    <main className="page-shell">
-      <section className="hero" aria-labelledby="page-title">
-        <p className="eyebrow">CHAPTER 01 · ENGINEERING FOUNDATION</p>
-        <h1 id="page-title">多 Agent 智能旅游攻略</h1>
-        <p className="intro">
-          自建 Harness 将协调目的地情报、交通住宿、行程规划与审校风险
-          Agent，生成可执行、可解释的旅行方案。
-        </p>
-        <div className={`status status--${apiState}`} role="status">
-          <span aria-hidden="true" />
+    <main>
+      <header className="topbar">
+        <a className="brand" href="#top" aria-label="行迹首页">
+          <span>行迹</span>
+          <small>Agentic Travel Studio</small>
+        </a>
+        <div className={`api-pill api-pill--${apiState}`} role="status">
+          <i aria-hidden="true" />
           {stateLabel}
         </div>
-        <p className="next-step">工程运行时已就绪，领域契约将在第二章实现。</p>
+      </header>
+
+      <section className="hero" id="top" aria-labelledby="page-title">
+        <div>
+          <p className="eyebrow">ONE BRAIN · FOUR SPECIALISTS</p>
+          <h1 id="page-title">
+            让每一段旅程
+            <br />
+            <em>有据可循。</em>
+          </h1>
+        </div>
+        <p className="intro">
+          一个总控协调四个专业
+          Agent，把目的地事实、交通住宿、路线规划与风险审校汇成可比较、可追溯的旅行方案。
+        </p>
       </section>
+
+      <div className="workspace">
+        <TripRequestForm
+          disabled={submitting || apiState === "offline"}
+          onSubmit={submit}
+        />
+        {problem ? (
+          <section className="error-card" role="alert">
+            <strong>暂时无法继续</strong>
+            <p>{problem.message}</p>
+            <button type="button" onClick={() => setProblem(null)}>
+              返回修改需求
+            </button>
+          </section>
+        ) : null}
+        {session ? <RunStatus run={session.run} /> : null}
+      </div>
     </main>
   );
 }
