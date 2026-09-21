@@ -9,4 +9,5 @@
 - `fixtures.py` 以固定时间、固定 ID 和 `Decimal` 金额生成完整的合成旅行场景；
 - `scripted_model.py` 按顺序返回预先校验的模型响应，可测试工具调用、结构化输出和脚本耗尽；
 - `resilience.py` 在有限并发和超时下运行故障/性能探针，汇总 success、partial、failure 与 P95；
+- `workflow_comparison.py` 用同一数据集对照单 Agent 与 1+4 的质量、延迟、成本和发布阈值；
 - `../../fixtures/synthetic/` 保存可版本化的 JSON 脚本，不读取网络、API Key 或真实用户数据。

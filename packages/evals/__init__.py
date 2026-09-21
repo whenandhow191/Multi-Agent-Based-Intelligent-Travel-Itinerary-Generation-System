@@ -27,6 +27,16 @@ from packages.evals.scripted_model import (
     ScriptedUsage,
     ScriptExhaustedError,
 )
+from packages.evals.workflow_comparison import (
+    WorkflowAcceptance,
+    WorkflowComparisonReport,
+    WorkflowComparisonRunner,
+    WorkflowEvaluationCase,
+    WorkflowEvaluator,
+    WorkflowMetrics,
+    WorkflowOutcome,
+    load_workflow_cases,
+)
 
 __all__ = [
     "AgentBenchmarkMetrics",
@@ -51,4 +61,12 @@ __all__ = [
     "SyntheticScenario",
     "build_synthetic_scenario",
     "load_benchmark_cases",
+    "WorkflowAcceptance",
+    "WorkflowComparisonReport",
+    "WorkflowComparisonRunner",
+    "WorkflowEvaluationCase",
+    "WorkflowEvaluator",
+    "WorkflowMetrics",
+    "WorkflowOutcome",
+    "load_workflow_cases",
 ]
