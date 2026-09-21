@@ -162,7 +162,8 @@ h1 em {
 .request-card,
 .run-status,
 .error-card,
-.collaboration-card {
+.collaboration-card,
+.itinerary-card {
   border: 1px solid #d8d0c1;
   border-radius: 22px;
   background: rgb(251 248 240 / 92%);
@@ -260,7 +261,8 @@ textarea:focus {
 
 .run-status,
 .error-card,
-.collaboration-card {
+.collaboration-card,
+.itinerary-card {
   margin-top: 24px;
   padding: 30px;
 }
@@ -330,6 +332,221 @@ textarea:focus {
 .collaboration-card {
   margin-top: 24px;
   padding: clamp(24px, 4vw, 46px);
+}
+
+.itinerary-card {
+  margin-top: 24px;
+  padding: clamp(24px, 4vw, 46px);
+}
+
+.plan-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.plan-tab {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #d8d0c1;
+  border-radius: 12px;
+  background: #f4f0e7;
+  color: var(--ink);
+  text-align: left;
+}
+
+.plan-tab small {
+  color: #718078;
+}
+
+.plan-tab--active {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: white;
+}
+
+.plan-tab--active small {
+  color: #b9ccc4;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  margin: 26px 0;
+  overflow: hidden;
+  border: 1px solid #ded7ca;
+  border-radius: 12px;
+  background: #ded7ca;
+}
+
+.metric-row div {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  background: #fffdf8;
+}
+
+.metric-row span {
+  color: #738078;
+  font-size: 0.7rem;
+}
+
+.itinerary-layout {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 28px;
+}
+
+.day-list article {
+  padding-left: 20px;
+  border-left: 1px solid #c8bead;
+}
+
+.day-list header {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.day-list header span {
+  color: var(--coral);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.day-list h3 {
+  margin: 0;
+}
+
+.schedule-item {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 14px;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+
+.schedule-item:hover,
+.schedule-item--active {
+  border-color: #d7cbb8;
+  background: #f0e8d9;
+}
+
+.schedule-item time {
+  color: var(--coral);
+  font-weight: 700;
+}
+
+.schedule-item > span {
+  display: grid;
+  gap: 5px;
+}
+
+.schedule-item small {
+  color: #728078;
+}
+
+.map-panel {
+  min-width: 0;
+}
+
+.map-topography {
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 70% 30%, rgb(232 117 82 / 18%), transparent 18%),
+    linear-gradient(135deg, #dce5d8, #efe4ce);
+  color: #668071;
+}
+
+.map-topography svg {
+  display: block;
+  width: 100%;
+  min-height: 330px;
+}
+
+.map-topography text {
+  fill: var(--ink);
+  font-size: 4px;
+  font-weight: 700;
+}
+
+.map-dot {
+  fill: var(--forest);
+  stroke: #fffdf8;
+  stroke-width: 2;
+  transition: 160ms ease;
+}
+
+.map-dot--active {
+  fill: var(--coral);
+}
+
+.map-panel > p {
+  margin: 10px 0 0;
+  color: #748078;
+  font-size: 0.75rem;
+}
+
+.comparison-table {
+  margin-top: 36px;
+  overflow-x: auto;
+}
+
+.comparison-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd5c7;
+  text-align: left;
+}
+
+.comparison-table th {
+  color: #6d7a74;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.evidence-drawer {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f1ecdf;
+}
+
+.evidence-drawer summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.evidence-drawer ul {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.evidence-drawer li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #66746d;
+  font-size: 0.78rem;
 }
 
 .cost-badge {
@@ -492,7 +709,10 @@ textarea:focus {
   }
 
   .agent-strip,
-  .trace-grid {
+  .trace-grid,
+  .plan-tabs,
+  .metric-row,
+  .itinerary-layout {
     grid-template-columns: 1fr;
   }
 }

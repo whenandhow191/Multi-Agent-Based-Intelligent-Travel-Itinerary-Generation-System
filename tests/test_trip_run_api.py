@@ -48,6 +48,8 @@ def test_openapi_exposes_complete_trip_run_fixture_flow() -> None:
         assert fetched.status_code == 200
         assert result.status_code == 200
         assert len(result.json()["bundle"]["plans"]) == 3
+        assert len(result.json()["map_points"]) == 2
+        assert result.json()["map_points"][0]["place_id"].startswith("place_")
         assert len(comparison.json()["comparison"]["entries"]) == 3
         assert clarified.json()["clarification_answers"][0]["answer"] == "轻松一点"
 

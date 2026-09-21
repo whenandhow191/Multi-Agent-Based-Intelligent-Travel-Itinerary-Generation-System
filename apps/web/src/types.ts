@@ -57,6 +57,79 @@ export interface RunProgressEvent {
   estimated_cost_microunits: number;
 }
 
+export interface CostEstimate {
+  kind: "known" | "range" | "unknown";
+  currency: string;
+  lower: string | null;
+  upper: string | null;
+  basis: string;
+}
+
+export interface ItineraryItem {
+  plan_item_id: string;
+  start_at: string;
+  end_at: string;
+  place_id: string;
+  activity: string;
+  estimated_cost: CostEstimate;
+  travel_mode_from_previous: string | null;
+  travel_minutes_from_previous: number | null;
+  evidence_ids: string[];
+}
+
+export interface ItineraryPlan {
+  plan_id: string;
+  title: string;
+  strategy: string;
+  days: Array<{
+    date: string;
+    timezone: string;
+    items: ItineraryItem[];
+    daily_cost: CostEstimate;
+    warnings: string[];
+  }>;
+  total_cost: CostEstimate;
+  score_breakdown: Record<string, number>;
+  is_executable: boolean;
+  unresolved_risks: string[];
+}
+
+export interface PlanComparisonEntry {
+  plan_id: string;
+  total_cost: CostEstimate;
+  activity_count: number;
+  commute_minutes: number;
+  free_minutes: number;
+  preference_coverage: number;
+  risk_count: number;
+  evidence_coverage: number;
+}
+
+export interface TripRunResult {
+  run_id: string;
+  version: number;
+  bundle: {
+    plans: ItineraryPlan[];
+    comparison: { entries: PlanComparisonEntry[] };
+    evidence: Array<{
+      evidence_id: string;
+      source_name: string;
+      source_url_or_provider_id: string;
+      freshness: string;
+    }>;
+    assumptions: string[];
+    collaboration_summary: { revision_rounds: number };
+  };
+  map_points: Array<{
+    place_id: string;
+    name: string;
+    longitude: number;
+    latitude: number;
+    evidence_ids: string[];
+  }>;
+  markdown: string;
+}
+
 export interface ApiProblem {
   message: string;
   status?: number;

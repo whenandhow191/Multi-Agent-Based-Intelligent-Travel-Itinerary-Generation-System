@@ -9,6 +9,16 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 from packages.domain import FinalPlanBundle, PlanComparison, TripRequest
 
 
+class MapPoint(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    place_id: str
+    name: str
+    longitude: float
+    latitude: float
+    evidence_ids: tuple[str, ...]
+
+
 class TripRunState(StrEnum):
     """User-visible lifecycle, independent from worker-internal task states."""
 
@@ -78,6 +88,7 @@ class TripRunResultResponse(BaseModel):
     run_id: str
     version: Annotated[int, Field(ge=1)]
     bundle: FinalPlanBundle
+    map_points: tuple[MapPoint, ...]
     markdown: str
 
 

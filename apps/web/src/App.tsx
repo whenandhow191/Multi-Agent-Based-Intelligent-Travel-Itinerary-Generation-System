@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { checkHealth, createRun, readProgress } from "./api";
+import { checkHealth, createRun, readProgress, readResult } from "./api";
 import { CollaborationPanel } from "./components/CollaborationPanel";
+import { ItineraryExplorer } from "./components/ItineraryExplorer";
 import { RunStatus } from "./components/RunStatus";
 import { TripRequestForm } from "./components/TripRequestForm";
 import type {
@@ -9,6 +10,7 @@ import type {
   RunProgressEvent,
   RunSession,
   TripRequestInput,
+  TripRunResult,
 } from "./types";
 
 type ApiState = "checking" | "online" | "offline";
@@ -19,6 +21,7 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [problem, setProblem] = useState<ApiProblem | null>(null);
   const [events, setEvents] = useState<RunProgressEvent[]>([]);
+  const [result, setResult] = useState<TripRunResult | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -39,6 +42,13 @@ export default function App() {
       .catch(() => setEvents([]));
   }, [session]);
 
+  useEffect(() => {
+    if (!session?.run.result_available) return;
+    readResult(session)
+      .then(setResult)
+      .catch(() => setResult(null));
+  }, [session]);
+
   async function submit(input: TripRequestInput) {
     setSubmitting(true);
     setProblem(null);
@@ -46,6 +56,7 @@ export default function App() {
       const created = await createRun(input);
       setSession(created);
       setEvents([]);
+      setResult(null);
       sessionStorage.setItem(
         `travel-run:${created.run.run_id}`,
         created.accessToken,
@@ -109,6 +120,7 @@ export default function App() {
         ) : null}
         {session ? <RunStatus run={session.run} /> : null}
         {events.length ? <CollaborationPanel events={events} /> : null}
+        {result ? <ItineraryExplorer result={result} /> : null}
       </div>
     </main>
   );

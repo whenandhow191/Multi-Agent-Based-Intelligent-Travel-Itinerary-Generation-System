@@ -3,6 +3,7 @@ import type {
   RunSession,
   TripRequestInput,
   TripRun,
+  TripRunResult,
 } from "./types";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
@@ -71,4 +72,10 @@ export async function readProgress(
     .map((block) => block.split("\n").find((line) => line.startsWith("data: ")))
     .filter((line): line is string => Boolean(line))
     .map((line) => JSON.parse(line.slice(6)) as RunProgressEvent);
+}
+
+export async function readResult(session: RunSession): Promise<TripRunResult> {
+  return request<TripRunResult>(`/api/v1/runs/${session.run.run_id}/result`, {
+    headers: { "X-Run-Token": session.accessToken },
+  });
 }

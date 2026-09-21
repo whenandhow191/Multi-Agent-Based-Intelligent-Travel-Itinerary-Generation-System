@@ -9,6 +9,7 @@ from secrets import token_bytes, token_hex
 
 from apps.api.run_models import (
     ClarificationAnswer,
+    MapPoint,
     PlanComparisonResponse,
     RunProgressEvent,
     TripRunCreated,
@@ -89,6 +90,16 @@ class InMemoryTripRunService:
             run_id=run_id,
             version=1,
             bundle=bundle,
+            map_points=tuple(
+                MapPoint(
+                    place_id=place.place_id,
+                    name=place.name,
+                    longitude=place.canonical_coordinate.longitude,
+                    latitude=place.canonical_coordinate.latitude,
+                    evidence_ids=place.evidence_ids,
+                )
+                for place in build_synthetic_scenario().places
+            ),
             markdown=FinalAggregator().render_markdown(bundle),
         )
         self._runs[run_id] = StoredTripRun(
