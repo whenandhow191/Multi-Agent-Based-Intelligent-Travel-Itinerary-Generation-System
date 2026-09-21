@@ -33,7 +33,8 @@
 [第八章实现说明](./docs/12-第八章实现说明.md) 和
 [第九章实现说明](./docs/13-第九章实现说明.md)。部署、升级、密钥和回滚见
 [部署与发布说明](./docs/14-部署与发布说明.md)，最终证据见
-[最终验收报告](./docs/15-最终验收报告.md)。
+[最终验收报告](./docs/15-最终验收报告.md)。首次启动完整项目请直接阅读
+[本地完整项目启动指南](./docs/16-本地完整项目启动指南.md)。
 
 ## 本地质量检查
 
@@ -53,7 +54,7 @@ conda env create --prefix .\.conda\env --file environment.yml
 conda activate .\.conda\env
 uv sync --active --all-groups --frozen
 pnpm install --frozen-lockfile
-Copy-Item .env.example .env
+Copy-Item .env.example .env.local
 python -m apps.api.config doctor
 pnpm demo
 ```
@@ -63,7 +64,7 @@ pnpm demo
 启动完整 Web 产品：
 
 ```powershell
-docker compose up --build
+docker compose --env-file .env.local up --build
 ```
 
 等待容器健康后访问：
@@ -75,15 +76,15 @@ docker compose up --build
 停止服务使用 `docker compose down`。只有明确需要清空本地 PostgreSQL 数据时才使用
 `docker compose down --volumes`。
 
-项目专用 Conda 环境、uv 虚拟环境、依赖缓存和 `.env` 均被 Git 忽略。默认
-`MOCK_MODE=true`，不要求任何 Provider Key；真实 Key 只写本机 `.env` 或部署平台的 Secret。
+项目专用 Conda 环境、uv 虚拟环境、依赖缓存和 `.env.local` 均被 Git 忽略。默认
+`MOCK_MODE=true`，不要求任何 Provider Key；真实 Key 只写本机 `.env.local` 或部署平台的 Secret。
 
 ## 发布验收
 
 ```powershell
 pnpm check
 pnpm demo
-docker compose config --quiet
+docker compose --env-file .env.local config --quiet
 ```
 
 推送形如 `v1.0.0` 的 Tag 后，Release 工作流会重新执行迁移、质量闸门、演示和镜像构建，全部成功后创建不可变 GitHub Release。
