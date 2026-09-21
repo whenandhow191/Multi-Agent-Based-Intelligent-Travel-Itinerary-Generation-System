@@ -46,6 +46,31 @@ class TripRunResource(BaseModel):
     current_version: Annotated[int, Field(ge=1)] = 1
 
 
+class TripRunCreated(BaseModel):
+    """Creation response; the anonymous token is returned only to this client."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    run: TripRunResource
+    access_token: str
+
+
+class RunProgressEvent(BaseModel):
+    """Public progress without prompts, private reasoning or secrets."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    sequence: Annotated[int, Field(ge=1)]
+    event_type: str
+    task_id: str | None = None
+    agent_id: str | None = None
+    state: str
+    message: str
+    occurred_at: AwareDatetime
+    artifact_ids: tuple[str, ...] = ()
+    estimated_cost_microunits: Annotated[int, Field(ge=0)] = 0
+
+
 class TripRunResultResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
