@@ -30,6 +30,22 @@ describe("App", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
+          provider_id: "penguin",
+          configured: true,
+          connection: "verified",
+          models: [
+            {
+              id: "claude-sonnet-5",
+              name: "claude-sonnet-5",
+              family: "claude",
+              available: true,
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
           access_token: "token_fixture",
           run: {
             run_id: "run_fixture",
@@ -122,6 +138,6 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { name: "不推倒重来，只修改必要部分" }),
     ).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
   });
 });

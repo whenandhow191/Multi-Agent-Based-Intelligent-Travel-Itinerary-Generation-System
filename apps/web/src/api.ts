@@ -1,4 +1,6 @@
 import type {
+  ModelCatalog,
+  PenguinModelId,
   RunProgressEvent,
   RunSession,
   RunVersionDiff,
@@ -40,14 +42,29 @@ export async function checkHealth(signal?: AbortSignal): Promise<void> {
   if (!response.ok) throw new Error("API health check failed");
 }
 
-export async function createRun(input: TripRequestInput): Promise<RunSession> {
+export async function listModels(): Promise<ModelCatalog> {
+  return request<ModelCatalog>("/api/v1/models");
+}
+
+export async function probeModel(modelId: PenguinModelId): Promise<void> {
+  await request("/api/v1/models/probe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model_id: modelId }),
+  });
+}
+
+export async function createRun(
+  input: TripRequestInput,
+  modelId: PenguinModelId,
+): Promise<RunSession> {
   const created = await request<CreatedRun>("/api/v1/runs", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Idempotency-Key": crypto.randomUUID(),
     },
-    body: JSON.stringify({ request: input }),
+    body: JSON.stringify({ request: input, model_id: modelId }),
   });
   return { run: created.run, accessToken: created.access_token };
 }

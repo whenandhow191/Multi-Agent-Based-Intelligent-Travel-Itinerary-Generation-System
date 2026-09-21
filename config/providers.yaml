@@ -9,6 +9,11 @@ providers:
     base_url: https://api.openai.com/v1
     api_key_env: OPENAI_API_KEY
     default_model: gpt-5.6-terra
+  penguin:
+    adapter: anthropic_compatible
+    base_url: https://api2.penguinsaichat.dpdns.org/v1
+    api_key_env: PENGUIN_API_KEY
+    default_model: claude-sonnet-5
   ollama:
     adapter: ollama
     base_url: http://127.0.0.1:11434/v1

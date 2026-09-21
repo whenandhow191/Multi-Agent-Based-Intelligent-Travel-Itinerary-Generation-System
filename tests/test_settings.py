@@ -61,3 +61,14 @@ def test_doctor_reports_deepseek_presence_without_secret_value() -> None:
     assert "DEEPSEEK_API_KEY: present (optional)" in output
     assert secret not in output
     assert secret not in repr(settings)
+
+
+def test_doctor_reports_penguin_presence_without_secret_value() -> None:
+    secret = "penguin-super-secret-value"
+    settings = Settings(penguin_api_key=SecretStr(secret))
+
+    output = render_doctor(settings)
+
+    assert "PENGUIN_API_KEY: present (optional)" in output
+    assert secret not in output
+    assert secret not in repr(settings)

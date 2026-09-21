@@ -66,7 +66,7 @@ async def create_trip_run(
     idempotency_key: IdempotencyKey,
 ) -> TripRunCreated:
     try:
-        return service.create(payload.request, idempotency_key)
+        return service.create(payload.request, idempotency_key, model_id=payload.model_id)
     except RunConflictError as exc:
         raise _conflict(exc) from exc
 

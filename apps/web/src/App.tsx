@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
-import { checkHealth, createRun, readProgress, readResult } from "./api";
+import {
+  checkHealth,
+  createRun,
+  listModels,
+  readProgress,
+  readResult,
+} from "./api";
 import { CollaborationPanel } from "./components/CollaborationPanel";
 import { ItineraryExplorer } from "./components/ItineraryExplorer";
 import { ReplanningPanel } from "./components/ReplanningPanel";
@@ -8,6 +14,8 @@ import { RunStatus } from "./components/RunStatus";
 import { TripRequestForm } from "./components/TripRequestForm";
 import type {
   ApiProblem,
+  ModelCatalog,
+  PenguinModelId,
   RunProgressEvent,
   RunSession,
   TripRequestInput,
@@ -23,11 +31,19 @@ export default function App() {
   const [problem, setProblem] = useState<ApiProblem | null>(null);
   const [events, setEvents] = useState<RunProgressEvent[]>([]);
   const [result, setResult] = useState<TripRunResult | null>(null);
+  const [modelCatalog, setModelCatalog] = useState<ModelCatalog | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     checkHealth(controller.signal)
-      .then(() => setApiState("online"))
+      .then(async () => {
+        setApiState("online");
+        try {
+          setModelCatalog(await listModels());
+        } catch {
+          setModelCatalog(null);
+        }
+      })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError")
           return;
@@ -50,11 +66,11 @@ export default function App() {
       .catch(() => setResult(null));
   }, [session]);
 
-  async function submit(input: TripRequestInput) {
+  async function submit(input: TripRequestInput, modelId: PenguinModelId) {
     setSubmitting(true);
     setProblem(null);
     try {
-      const created = await createRun(input);
+      const created = await createRun(input, modelId);
       setSession(created);
       setEvents([]);
       setResult(null);
@@ -117,6 +133,7 @@ export default function App() {
       <div className="workspace">
         <TripRequestForm
           disabled={submitting || apiState === "offline"}
+          modelCatalog={modelCatalog}
           onSubmit={submit}
         />
         {problem ? (

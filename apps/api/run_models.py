@@ -6,6 +6,7 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
+from apps.api.model_models import PenguinModelId
 from packages.domain import FinalPlanBundle, PlanComparison, TripRequest
 
 
@@ -33,6 +34,7 @@ class TripRunCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     request: TripRequest
+    model_id: PenguinModelId = "claude-sonnet-5"
 
 
 class ClarificationAnswer(BaseModel):
@@ -48,6 +50,8 @@ class TripRunResource(BaseModel):
     run_id: str
     state: TripRunState
     fixture_mode: bool
+    model_provider: str = "penguin"
+    model_id: PenguinModelId = "claude-sonnet-5"
     request: TripRequest
     created_at: AwareDatetime
     updated_at: AwareDatetime

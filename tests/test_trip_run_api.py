@@ -34,6 +34,8 @@ def test_openapi_exposes_complete_trip_run_fixture_flow() -> None:
         run, headers = create_run(api)
         run_id = run["run_id"]
         assert run["fixture_mode"] is True
+        assert run["model_provider"] == "penguin"
+        assert run["model_id"] == "claude-sonnet-5"
         assert run["state"] == "succeeded"
 
         fetched = api.get(f"/api/v1/runs/{run_id}", headers=headers)
@@ -71,6 +73,25 @@ def test_fixture_runner_rejects_unsupported_destination() -> None:
             json={"request": request.model_dump(mode="json")},
         )
     assert response.status_code == 409
+
+
+def test_run_accepts_an_allowlisted_penguin_model_and_rejects_unknown_models() -> None:
+    request = build_trip_request().model_dump(mode="json")
+    with client() as api:
+        accepted = api.post(
+            "/api/v1/runs",
+            headers={"Idempotency-Key": "model-selection"},
+            json={"request": request, "model_id": "gpt-5.6-terra"},
+        )
+        rejected = api.post(
+            "/api/v1/runs",
+            headers={"Idempotency-Key": "unknown-model"},
+            json={"request": request, "model_id": "untrusted-model"},
+        )
+
+    assert accepted.status_code == 201
+    assert accepted.json()["run"]["model_id"] == "gpt-5.6-terra"
+    assert rejected.status_code == 422
 
 
 def test_token_sse_idempotency_and_delete_lifecycle() -> None:

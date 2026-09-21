@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from apps.api.model_routes import router as model_router
 from apps.api.run_routes import router as run_router
 from apps.api.settings import get_settings
 
@@ -33,6 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(run_router)
+app.include_router(model_router)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["operations"])

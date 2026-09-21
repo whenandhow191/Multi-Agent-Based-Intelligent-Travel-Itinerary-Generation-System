@@ -1,6 +1,7 @@
 """Provider adapters, profiles, routing, accounting and model evaluation support."""
 
 from packages.models.adapters import (
+    AnthropicCompatibleProvider,
     ModelProviderError,
     OllamaProvider,
     OpenAICompatibleProvider,
@@ -36,6 +37,7 @@ from packages.models.routing import (
 )
 
 __all__ = [
+    "AnthropicCompatibleProvider",
     "ModelProviderError",
     "ModelProfileRegistry",
     "OllamaProvider",

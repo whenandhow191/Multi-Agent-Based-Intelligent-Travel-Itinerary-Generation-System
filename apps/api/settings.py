@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     )
     openai_api_key: SecretStr | None = None
     deepseek_api_key: SecretStr | None = None
+    penguin_api_key: SecretStr | None = None
+    penguin_base_url: str = "https://api2.penguinsaichat.dpdns.org/v1"
     amap_web_service_key: SecretStr | None = None
     amap_js_key: SecretStr | None = None
     qweather_api_key: SecretStr | None = None

@@ -31,6 +31,7 @@ def inspect_configuration(settings: Settings) -> tuple[ConfigurationCheck, ...]:
         ConfigurationCheck(
             "DEEPSEEK_API_KEY", _secret_is_present(settings.deepseek_api_key), False
         ),
+        ConfigurationCheck("PENGUIN_API_KEY", _secret_is_present(settings.penguin_api_key), False),
         ConfigurationCheck(
             "AMAP_WEB_SERVICE_KEY", _secret_is_present(settings.amap_web_service_key), False
         ),

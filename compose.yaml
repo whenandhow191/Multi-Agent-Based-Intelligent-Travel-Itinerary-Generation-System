@@ -22,6 +22,9 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    env_file:
+      - path: .env.local
+        required: false
     environment:
       APP_ENV: ${APP_ENV:-development}
       DEBUG: ${DEBUG:-false}

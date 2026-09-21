@@ -10,7 +10,12 @@ from pydantic import AnyHttpUrl, Field, SecretStr, StringConstraints
 
 from packages.domain.common import DomainModel, Identifier, NonEmptyText
 from packages.harness import ModelGateway, ModelPolicy, ModelRequest, ModelTurn
-from packages.models.adapters import OllamaProvider, OpenAICompatibleProvider, ResponsesProvider
+from packages.models.adapters import (
+    AnthropicCompatibleProvider,
+    OllamaProvider,
+    OpenAICompatibleProvider,
+    ResponsesProvider,
+)
 from packages.models.routing import ModelCandidate, ModelRoutingPolicy, RoutedModelGateway
 
 ReasoningEffort = Literal["none", "low", "medium", "high", "xhigh", "max"]
@@ -23,7 +28,7 @@ EnvironmentVariable = Annotated[
 class ProviderProfile(DomainModel):
     """One transport endpoint and credential reference, never a credential value."""
 
-    adapter: Literal["responses", "openai_compatible", "ollama"]
+    adapter: Literal["responses", "openai_compatible", "anthropic_compatible", "ollama"]
     base_url: AnyHttpUrl
     api_key_env: EnvironmentVariable | None = None
     default_model: NonEmptyText
@@ -59,7 +64,7 @@ class ResolvedModelProfile(DomainModel):
     agent_id: Identifier
     tier: ProfileTier
     provider_id: Identifier
-    adapter: Literal["responses", "openai_compatible", "ollama"]
+    adapter: Literal["responses", "openai_compatible", "anthropic_compatible", "ollama"]
     base_url: AnyHttpUrl
     api_key_env: EnvironmentVariable | None = None
     model_id: NonEmptyText
@@ -146,6 +151,14 @@ class ModelProfileRegistry:
             )
         elif profile.adapter == "openai_compatible":
             gateway = OpenAICompatibleProvider(
+                provider_id=profile.provider_id,
+                base_url=base_url,
+                model_id=profile.model_id,
+                client=client,
+                api_key=api_key,
+            )
+        elif profile.adapter == "anthropic_compatible":
+            gateway = AnthropicCompatibleProvider(
                 provider_id=profile.provider_id,
                 base_url=base_url,
                 model_id=profile.model_id,

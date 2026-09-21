@@ -1,4 +1,4 @@
-"""HTTP model adapters that normalize Responses and OpenAI-compatible APIs."""
+"""HTTP model adapters that normalize Responses, OpenAI and Anthropic APIs."""
 
 import hashlib
 import json
@@ -75,11 +75,7 @@ class ResponsesProvider(ModelGateway):
         return _parse_responses(response, self.provider_id, self.model_id, request)
 
     async def _post(self, path: str, payload: dict[str, JsonValue]) -> dict[str, JsonValue]:
-        headers = {"Content-Type": "application/json"}
-        if self.api_key is not None and self.api_key.get_secret_value().strip():
-            headers["Authorization"] = f"Bearer {self.api_key.get_secret_value()}"
-        elif self.require_api_key:
-            raise ModelProviderError(ProviderFailureKind.AUTH, self.provider_id, retryable=False)
+        headers = self._request_headers()
         try:
             response = await self.client.post(
                 f"{self.base_url}{path}", json=payload, headers=headers
@@ -96,6 +92,14 @@ class ResponsesProvider(ModelGateway):
             raise ModelProviderError(
                 ProviderFailureKind.TRANSPORT, self.provider_id, retryable=True
             ) from exc
+
+    def _request_headers(self) -> dict[str, str]:
+        headers = {"Content-Type": "application/json"}
+        if self.api_key is not None and self.api_key.get_secret_value().strip():
+            headers["Authorization"] = f"Bearer {self.api_key.get_secret_value()}"
+        elif self.require_api_key:
+            raise ModelProviderError(ProviderFailureKind.AUTH, self.provider_id, retryable=False)
+        return headers
 
 
 class OpenAIResponsesProvider(ResponsesProvider):
@@ -118,6 +122,29 @@ class OpenAICompatibleProvider(ResponsesProvider):
         payload = _chat_payload(request, self.model_id)
         response = await self._post("/chat/completions", payload)
         return _parse_chat(response, self.provider_id, self.model_id, request)
+
+
+class AnthropicCompatibleProvider(ResponsesProvider):
+    """Anthropic Messages adapter for relays such as ``@ai-sdk/anthropic``."""
+
+    async def generate(self, request: ModelRequest) -> ModelTurn:
+        response = await self._post("/messages", _anthropic_payload(request, self.model_id))
+        return _parse_anthropic(response, self.provider_id, self.model_id, request)
+
+    def _request_headers(self) -> dict[str, str]:
+        if self.api_key is None or not self.api_key.get_secret_value().strip():
+            if self.require_api_key:
+                raise ModelProviderError(
+                    ProviderFailureKind.AUTH, self.provider_id, retryable=False
+                )
+            return {"Content-Type": "application/json", "anthropic-version": "2023-06-01"}
+        key = self.api_key.get_secret_value()
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {key}",
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+        }
 
 
 class OllamaProvider(OpenAICompatibleProvider):
@@ -199,6 +226,53 @@ def _chat_payload(request: ModelRequest, model_id: str) -> dict[str, JsonValue]:
             "type": "json_schema",
             "json_schema": {"name": "agent_output", "schema": request.output_schema},
         }
+    return payload
+
+
+def _anthropic_payload(request: ModelRequest, model_id: str) -> dict[str, JsonValue]:
+    system_parts: list[str] = []
+    messages: list[JsonValue] = []
+    for message in request.messages:
+        if message.role is MessageRole.SYSTEM:
+            system_parts.append(message.content)
+            continue
+        if message.role is MessageRole.TOOL:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": message.tool_call_id or "tool_call",
+                            "content": message.content,
+                        }
+                    ],
+                }
+            )
+            continue
+        messages.append({"role": message.role.value, "content": message.content})
+
+    if request.output_schema is not None:
+        schema = json.dumps(request.output_schema, ensure_ascii=False, separators=(",", ":"))
+        system_parts.append(
+            "Return only one valid JSON object matching this JSON Schema. "
+            f"Do not use Markdown fences. Schema: {schema}"
+        )
+    payload: dict[str, JsonValue] = {
+        "model": model_id,
+        "system": "\n\n".join(system_parts),
+        "messages": messages,
+        "tools": [
+            {
+                "name": _wire_tool_name(item.name),
+                "description": item.description,
+                "input_schema": item.input_schema,
+            }
+            for item in request.tools
+        ],
+        "temperature": request.policy.temperature,
+        "max_tokens": request.policy.max_output_tokens,
+    }
     return payload
 
 
@@ -284,6 +358,49 @@ def _parse_chat(
     )
 
 
+def _parse_anthropic(
+    body: dict[str, JsonValue], provider: str, configured_model: str, request: ModelRequest
+) -> ModelTurn:
+    content = body.get("content")
+    if not isinstance(content, list):
+        raise ModelProviderError(ProviderFailureKind.SCHEMA, provider, retryable=False)
+    reverse_names = {_wire_tool_name(item.name): item.name for item in request.tools}
+    calls: list[ModelToolCall] = []
+    text_parts: list[str] = []
+    for block in content:
+        if not isinstance(block, dict):
+            continue
+        if block.get("type") == "text" and isinstance(block.get("text"), str):
+            text_parts.append(cast(str, block["text"]))
+        elif block.get("type") == "tool_use":
+            name = block.get("name")
+            arguments = block.get("input")
+            if not isinstance(name, str) or not isinstance(arguments, dict):
+                raise ModelProviderError(ProviderFailureKind.SCHEMA, provider, retryable=False)
+            calls.append(
+                ModelToolCall(
+                    call_id=_safe_identifier(block.get("id"), "model_call"),
+                    name=reverse_names.get(name, name),
+                    arguments=arguments,
+                )
+            )
+    usage = _anthropic_usage(body.get("usage"))
+    model_id = body.get("model") if isinstance(body.get("model"), str) else configured_model
+    if calls:
+        return ModelTurn(
+            tool_calls=tuple(calls),
+            usage=usage,
+            finish_reason=FinishReason.TOOL_CALLS,
+            model_id=cast(str, model_id),
+        )
+    return ModelTurn(
+        output=_structured_output("\n".join(text_parts), provider),
+        usage=usage,
+        finish_reason=FinishReason.STOP,
+        model_id=cast(str, model_id),
+    )
+
+
 def _responses_tool_call(
     item: dict[str, JsonValue], reverse_names: dict[str, str], provider: str
 ) -> ModelToolCall:
@@ -359,6 +476,19 @@ def _chat_usage(raw: JsonValue | None) -> ModelUsage:
         output_tokens=_integer(raw.get("completion_tokens")),
         cached_input_tokens=_nested_integer(input_details, "cached_tokens"),
         reasoning_tokens=_nested_integer(output_details, "reasoning_tokens"),
+    )
+
+
+def _anthropic_usage(raw: JsonValue | None) -> ModelUsage:
+    if not isinstance(raw, dict):
+        return ModelUsage()
+    return ModelUsage(
+        input_tokens=_integer(raw.get("input_tokens")),
+        output_tokens=_integer(raw.get("output_tokens")),
+        cached_input_tokens=(
+            _integer(raw.get("cache_read_input_tokens"))
+            + _integer(raw.get("cache_creation_input_tokens"))
+        ),
     )
 
 

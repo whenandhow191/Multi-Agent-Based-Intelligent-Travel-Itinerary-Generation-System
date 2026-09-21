@@ -13,7 +13,12 @@ from packages.harness import (
     ModelToolSpec,
     TraceContext,
 )
-from packages.models import OllamaProvider, OpenAICompatibleProvider, OpenAIResponsesProvider
+from packages.models import (
+    AnthropicCompatibleProvider,
+    OllamaProvider,
+    OpenAICompatibleProvider,
+    OpenAIResponsesProvider,
+)
 
 
 def _request(*, tools: bool = False) -> ModelRequest:
@@ -124,5 +129,40 @@ def test_ollama_uses_local_chat_compatibility_without_key() -> None:
             turn = await gateway.generate(_request())
             assert turn.output == {"ok": True}
             assert turn.usage.total_tokens == 7
+
+    asyncio.run(scenario())
+
+
+def test_anthropic_compatible_provider_uses_messages_protocol_and_shared_key() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1/messages"
+        assert request.headers["x-api-key"] == "penguin-secret"
+        assert request.headers["Authorization"] == "Bearer penguin-secret"
+        payload = request.read().decode()
+        assert '"model":"claude-sonnet-5"' in payload
+        assert "Return only one valid JSON object" in payload
+        return httpx.Response(
+            200,
+            json={
+                "id": "msg_fixture",
+                "model": "claude-sonnet-5",
+                "content": [{"type": "text", "text": '{"ok":true}'}],
+                "stop_reason": "end_turn",
+                "usage": {"input_tokens": 8, "output_tokens": 3},
+            },
+        )
+
+    async def scenario() -> None:
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+            gateway = AnthropicCompatibleProvider(
+                provider_id="penguin",
+                base_url="https://relay.example/v1",
+                model_id="claude-sonnet-5",
+                client=client,
+                api_key=SecretStr("penguin-secret"),
+            )
+            turn = await gateway.generate(_request())
+            assert turn.output == {"ok": True}
+            assert turn.usage.total_tokens == 11
 
     asyncio.run(scenario())

@@ -28,10 +28,33 @@ export interface TripRequestInput {
   natural_language_notes: string;
 }
 
+export type PenguinModelId =
+  | "claude-sonnet-5"
+  | "claude-opus-5"
+  | "gpt-5.6-luna"
+  | "gpt-5.6-sol"
+  | "gpt-5.6-terra";
+
+export interface ModelOption {
+  id: PenguinModelId;
+  name: string;
+  family: "claude" | "gpt";
+  available: boolean;
+}
+
+export interface ModelCatalog {
+  provider_id: "penguin";
+  configured: boolean;
+  connection: "unconfigured" | "verified" | "unavailable";
+  models: ModelOption[];
+}
+
 export interface TripRun {
   run_id: string;
   state: RunState;
   fixture_mode: boolean;
+  model_provider: string;
+  model_id: PenguinModelId;
   request: TripRequestInput;
   created_at: string;
   updated_at: string;

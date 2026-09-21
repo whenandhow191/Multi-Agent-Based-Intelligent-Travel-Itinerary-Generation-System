@@ -8,6 +8,7 @@ from json import dumps
 from secrets import token_bytes, token_hex
 from threading import RLock
 
+from apps.api.model_models import PenguinModelId
 from apps.api.run_models import (
     ClarificationAnswer,
     MapPoint,
@@ -67,16 +68,27 @@ class InMemoryTripRunService:
         self._token_secret = token_bytes(32)
         self._create_lock = RLock()
 
-    def create(self, request: TripRequest, idempotency_key: str) -> TripRunCreated:
+    def create(
+        self,
+        request: TripRequest,
+        idempotency_key: str,
+        *,
+        model_id: PenguinModelId = "claude-sonnet-5",
+    ) -> TripRunCreated:
         """Create once per idempotency key, including under concurrent API workers."""
 
         with self._create_lock:
-            return self._create_locked(request, idempotency_key)
+            return self._create_locked(request, idempotency_key, model_id)
 
-    def _create_locked(self, request: TripRequest, idempotency_key: str) -> TripRunCreated:
+    def _create_locked(
+        self, request: TripRequest, idempotency_key: str, model_id: PenguinModelId
+    ) -> TripRunCreated:
         self._validate_fixture_request(request)
         request_digest = sha256(
-            dumps(request.model_dump(mode="json"), sort_keys=True).encode()
+            dumps(
+                {"request": request.model_dump(mode="json"), "model_id": model_id},
+                sort_keys=True,
+            ).encode()
         ).hexdigest()
         if existing := self._idempotency.get(idempotency_key):
             run_id, existing_digest = existing
@@ -95,6 +107,8 @@ class InMemoryTripRunService:
             run_id=run_id,
             state=TripRunState.SUCCEEDED,
             fixture_mode=True,
+            model_provider="penguin",
+            model_id=model_id,
             request=request,
             created_at=now,
             updated_at=now,
