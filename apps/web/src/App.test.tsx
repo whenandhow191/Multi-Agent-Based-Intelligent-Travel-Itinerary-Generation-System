@@ -42,6 +42,11 @@ describe("App", () => {
             current_version: 1,
           },
         }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: async () =>
+          'id: 1\nevent: run.completed\ndata: {"sequence":1,"event_type":"run.completed","task_id":null,"agent_id":"coordinator","state":"succeeded","message":"完成","occurred_at":"2026-09-21T00:00:00Z","artifact_ids":[],"tool_calls":[],"estimated_cost_microunits":20}\n\n',
       });
     vi.stubGlobal("fetch", fetchMock);
     vi.stubGlobal("crypto", { randomUUID: () => "idempotency-fixture" });
@@ -55,6 +60,6 @@ describe("App", () => {
       await screen.findByRole("heading", { name: "方案已生成" }),
     ).toBeInTheDocument();
     expect(screen.getByText("运行编号 run_fixture")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

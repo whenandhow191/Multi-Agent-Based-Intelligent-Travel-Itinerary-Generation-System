@@ -1,4 +1,9 @@
-import type { RunSession, TripRequestInput, TripRun } from "./types";
+import type {
+  RunProgressEvent,
+  RunSession,
+  TripRequestInput,
+  TripRun,
+} from "./types";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
@@ -48,4 +53,22 @@ export async function readRun(session: RunSession): Promise<TripRun> {
   return request<TripRun>(`/api/v1/runs/${session.run.run_id}`, {
     headers: { "X-Run-Token": session.accessToken },
   });
+}
+
+export async function readProgress(
+  session: RunSession,
+): Promise<RunProgressEvent[]> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/v1/runs/${session.run.run_id}/events`,
+    {
+      headers: { "X-Run-Token": session.accessToken },
+    },
+  );
+  if (!response.ok) throw new Error(`无法读取协作进度（${response.status}）`);
+  const payload = await response.text();
+  return payload
+    .split("\n\n")
+    .map((block) => block.split("\n").find((line) => line.startsWith("data: ")))
+    .filter((line): line is string => Boolean(line))
+    .map((line) => JSON.parse(line.slice(6)) as RunProgressEvent);
 }

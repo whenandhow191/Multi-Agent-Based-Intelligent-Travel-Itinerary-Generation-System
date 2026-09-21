@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 
-import { checkHealth, createRun } from "./api";
+import { checkHealth, createRun, readProgress } from "./api";
+import { CollaborationPanel } from "./components/CollaborationPanel";
 import { RunStatus } from "./components/RunStatus";
 import { TripRequestForm } from "./components/TripRequestForm";
-import type { ApiProblem, RunSession, TripRequestInput } from "./types";
+import type {
+  ApiProblem,
+  RunProgressEvent,
+  RunSession,
+  TripRequestInput,
+} from "./types";
 
 type ApiState = "checking" | "online" | "offline";
 
@@ -12,6 +18,7 @@ export default function App() {
   const [session, setSession] = useState<RunSession | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [problem, setProblem] = useState<ApiProblem | null>(null);
+  const [events, setEvents] = useState<RunProgressEvent[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -25,12 +32,20 @@ export default function App() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    if (!session) return;
+    readProgress(session)
+      .then(setEvents)
+      .catch(() => setEvents([]));
+  }, [session]);
+
   async function submit(input: TripRequestInput) {
     setSubmitting(true);
     setProblem(null);
     try {
       const created = await createRun(input);
       setSession(created);
+      setEvents([]);
       sessionStorage.setItem(
         `travel-run:${created.run.run_id}`,
         created.accessToken,
@@ -93,6 +108,7 @@ export default function App() {
           </section>
         ) : null}
         {session ? <RunStatus run={session.run} /> : null}
+        {events.length ? <CollaborationPanel events={events} /> : null}
       </div>
     </main>
   );

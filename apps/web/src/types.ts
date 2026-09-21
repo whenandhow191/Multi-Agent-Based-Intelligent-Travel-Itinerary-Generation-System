@@ -44,6 +44,19 @@ export interface RunSession {
   accessToken: string;
 }
 
+export interface RunProgressEvent {
+  sequence: number;
+  event_type: string;
+  task_id: string | null;
+  agent_id: string | null;
+  state: string;
+  message: string;
+  occurred_at: string;
+  artifact_ids: string[];
+  tool_calls: string[];
+  estimated_cost_microunits: number;
+}
+
 export interface ApiProblem {
   message: string;
   status?: number;

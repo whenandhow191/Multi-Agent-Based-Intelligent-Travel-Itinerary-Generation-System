@@ -90,6 +90,7 @@ def test_token_sse_idempotency_and_delete_lifecycle() -> None:
         assert "event: run.started" in stream.text
         assert "event: run.completed" in stream.text
         assert "artifact_candidates_fixture" in stream.text
+        assert "optimizer.solve" in stream.text
 
         deleted = api.delete(f"/api/v1/runs/{run_id}", headers=headers)
         assert deleted.status_code == 204

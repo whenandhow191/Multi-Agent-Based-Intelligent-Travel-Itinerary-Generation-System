@@ -180,7 +180,7 @@ class InMemoryTripRunService:
     @staticmethod
     def _fixture_events(now: datetime) -> tuple[RunProgressEvent, ...]:
         stages = (
-            ("run.started", None, "coordinator", "running", "总控已创建固定任务图", (), 40),
+            ("run.started", None, "coordinator", "running", "总控已创建固定任务图", (), (), 40),
             (
                 "task.completed",
                 "destination_intelligence",
@@ -188,6 +188,7 @@ class InMemoryTripRunService:
                 "succeeded",
                 "目的地情报与证据已发布",
                 ("artifact_destination_fixture",),
+                ("places.search", "weather.forecast"),
                 90,
             ),
             (
@@ -197,6 +198,7 @@ class InMemoryTripRunService:
                 "succeeded",
                 "交通住宿候选已发布",
                 ("artifact_mobility_fixture",),
+                ("transport.search", "lodging.search"),
                 80,
             ),
             (
@@ -206,6 +208,7 @@ class InMemoryTripRunService:
                 "succeeded",
                 "受控路线矩阵已生成",
                 ("artifact_route_matrix_fixture",),
+                ("routes.compute",),
                 0,
             ),
             (
@@ -215,6 +218,7 @@ class InMemoryTripRunService:
                 "succeeded",
                 "三个候选方案已完成",
                 ("artifact_candidates_fixture",),
+                ("optimizer.solve", "budget.calculate"),
                 130,
             ),
             (
@@ -224,6 +228,7 @@ class InMemoryTripRunService:
                 "succeeded",
                 "确定性审校通过",
                 ("artifact_review_fixture",),
+                ("schedule.validate", "budget.calculate"),
                 70,
             ),
             (
@@ -233,6 +238,7 @@ class InMemoryTripRunService:
                 "succeeded",
                 "最终方案已验证并可导出",
                 ("artifact_final_bundle_fixture",),
+                (),
                 20,
             ),
         )
@@ -246,6 +252,7 @@ class InMemoryTripRunService:
                 message=message,
                 occurred_at=now,
                 artifact_ids=artifacts,
+                tool_calls=tools,
                 estimated_cost_microunits=cost,
             )
             for index, (
@@ -255,6 +262,7 @@ class InMemoryTripRunService:
                 state,
                 message,
                 artifacts,
+                tools,
                 cost,
             ) in enumerate(stages, start=1)
         )

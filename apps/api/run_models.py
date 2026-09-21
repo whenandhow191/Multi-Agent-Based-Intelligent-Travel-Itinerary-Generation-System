@@ -68,6 +68,7 @@ class RunProgressEvent(BaseModel):
     message: str
     occurred_at: AwareDatetime
     artifact_ids: tuple[str, ...] = ()
+    tool_calls: tuple[str, ...] = ()
     estimated_cost_microunits: Annotated[int, Field(ge=0)] = 0
 
 
