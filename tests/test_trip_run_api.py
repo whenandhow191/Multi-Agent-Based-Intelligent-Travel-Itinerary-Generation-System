@@ -97,3 +97,42 @@ def test_token_sse_idempotency_and_delete_lifecycle() -> None:
         deleted = api.delete(f"/api/v1/runs/{run_id}", headers=headers)
         assert deleted.status_code == 204
         assert api.get(f"/api/v1/runs/{run_id}", headers=headers).status_code == 404
+
+
+def test_targeted_replanning_versions_diff_restore_and_exports() -> None:
+    with client() as api:
+        run, headers = create_run(api, key="replan-request-key")
+        run_id = run["run_id"]
+
+        replanned = api.post(
+            f"/api/v1/runs/{run_id}/replan",
+            headers=headers,
+            json={"instruction": "第二天轻松一点", "base_version": 1},
+        )
+        assert replanned.status_code == 200
+        assert replanned.json()["version"] == 2
+        relaxed = next(
+            plan for plan in replanned.json()["bundle"]["plans"] if plan["strategy"] == "relaxed"
+        )
+        assert len(relaxed["days"][0]["items"]) == 1
+
+        versions = api.get(f"/api/v1/runs/{run_id}/versions", headers=headers)
+        assert [item["version"] for item in versions.json()["versions"]] == [1, 2]
+        changed_tasks = versions.json()["versions"][1]["changed_task_ids"]
+        assert "itinerary_planning" in changed_tasks
+        assert "destination_intelligence" not in changed_tasks
+
+        difference = api.get(f"/api/v1/runs/{run_id}/versions/diff?from=1&to=2", headers=headers)
+        assert difference.status_code == 200
+        assert difference.json()["changed_paths"]
+
+        markdown = api.get(f"/api/v1/runs/{run_id}/export?format=markdown", headers=headers)
+        exported_json = api.get(f"/api/v1/runs/{run_id}/export?format=json", headers=headers)
+        assert markdown.headers["content-disposition"].endswith('.md"')
+        assert markdown.text.startswith("# 北京")
+        assert exported_json.json()["run_id"] == run_id
+
+        restored = api.post(f"/api/v1/runs/{run_id}/versions/1/restore", headers=headers)
+        assert restored.status_code == 200
+        assert restored.json()["version"] == 1
+        assert api.get(f"/api/v1/runs/{run_id}", headers=headers).json()["current_version"] == 1

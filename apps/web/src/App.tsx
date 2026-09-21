@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { checkHealth, createRun, readProgress, readResult } from "./api";
 import { CollaborationPanel } from "./components/CollaborationPanel";
 import { ItineraryExplorer } from "./components/ItineraryExplorer";
+import { ReplanningPanel } from "./components/ReplanningPanel";
 import { RunStatus } from "./components/RunStatus";
 import { TripRequestForm } from "./components/TripRequestForm";
 import type {
@@ -70,6 +71,15 @@ export default function App() {
     }
   }
 
+  function acceptResult(next: TripRunResult) {
+    setResult(next);
+    setSession((current) =>
+      current
+        ? { ...current, run: { ...current.run, current_version: next.version } }
+        : current,
+    );
+  }
+
   const stateLabel = {
     checking: "正在检查 API",
     online: "API 已连接",
@@ -121,6 +131,13 @@ export default function App() {
         {session ? <RunStatus run={session.run} /> : null}
         {events.length ? <CollaborationPanel events={events} /> : null}
         {result ? <ItineraryExplorer result={result} /> : null}
+        {result && session ? (
+          <ReplanningPanel
+            session={session}
+            result={result}
+            onResult={acceptResult}
+          />
+        ) : null}
       </div>
     </main>
   );

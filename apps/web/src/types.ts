@@ -130,6 +130,23 @@ export interface TripRunResult {
   markdown: string;
 }
 
+export interface RunVersionSummary {
+  version: number;
+  instruction: string;
+  created_at: string;
+  changed_task_ids: string[];
+  invalidated_artifact_ids: string[];
+  current: boolean;
+}
+
+export interface RunVersionDiff {
+  run_id: string;
+  from_version: number;
+  to_version: number;
+  changed_paths: string[];
+  summary: string;
+}
+
 export interface ApiProblem {
   message: string;
   status?: number;

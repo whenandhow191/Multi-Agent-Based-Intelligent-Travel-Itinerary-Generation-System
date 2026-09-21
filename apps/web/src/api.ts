@@ -1,6 +1,8 @@
 import type {
   RunProgressEvent,
   RunSession,
+  RunVersionDiff,
+  RunVersionSummary,
   TripRequestInput,
   TripRun,
   TripRunResult,
@@ -78,4 +80,68 @@ export async function readResult(session: RunSession): Promise<TripRunResult> {
   return request<TripRunResult>(`/api/v1/runs/${session.run.run_id}/result`, {
     headers: { "X-Run-Token": session.accessToken },
   });
+}
+
+export async function replanRun(
+  session: RunSession,
+  instruction: string,
+  baseVersion: number,
+): Promise<TripRunResult> {
+  return request<TripRunResult>(`/api/v1/runs/${session.run.run_id}/replan`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Run-Token": session.accessToken,
+    },
+    body: JSON.stringify({ instruction, base_version: baseVersion }),
+  });
+}
+
+export async function readVersions(
+  session: RunSession,
+): Promise<RunVersionSummary[]> {
+  const response = await request<{ versions: RunVersionSummary[] }>(
+    `/api/v1/runs/${session.run.run_id}/versions`,
+    { headers: { "X-Run-Token": session.accessToken } },
+  );
+  return response.versions;
+}
+
+export async function readVersionDiff(
+  session: RunSession,
+  fromVersion: number,
+  toVersion: number,
+): Promise<RunVersionDiff> {
+  return request<RunVersionDiff>(
+    `/api/v1/runs/${session.run.run_id}/versions/diff?from=${fromVersion}&to=${toVersion}`,
+    { headers: { "X-Run-Token": session.accessToken } },
+  );
+}
+
+export async function restoreVersion(
+  session: RunSession,
+  version: number,
+): Promise<TripRunResult> {
+  return request<TripRunResult>(
+    `/api/v1/runs/${session.run.run_id}/versions/${version}/restore`,
+    { method: "POST", headers: { "X-Run-Token": session.accessToken } },
+  );
+}
+
+export async function downloadRun(
+  session: RunSession,
+  format: "markdown" | "json",
+): Promise<void> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/v1/runs/${session.run.run_id}/export?format=${format}`,
+    { headers: { "X-Run-Token": session.accessToken } },
+  );
+  if (!response.ok) throw new Error(`导出失败（${response.status}）`);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${session.run.run_id}.${format === "markdown" ? "md" : "json"}`;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }

@@ -11,7 +11,11 @@ from apps.api.run_models import (
     ClarificationAnswer,
     MapPoint,
     PlanComparisonResponse,
+    ReplanRequest,
     RunProgressEvent,
+    RunVersionDiff,
+    RunVersionList,
+    RunVersionSummary,
     TripRunCreated,
     TripRunResource,
     TripRunResultResponse,
@@ -49,6 +53,8 @@ class StoredTripRun:
     token_hash: str
     events: tuple[RunProgressEvent, ...]
     answers: list[ClarificationAnswer] = field(default_factory=list)
+    versions: dict[int, TripRunResultResponse] = field(default_factory=dict)
+    version_summaries: list[RunVersionSummary] = field(default_factory=list)
 
 
 class InMemoryTripRunService:
@@ -102,11 +108,28 @@ class InMemoryTripRunService:
             ),
             markdown=FinalAggregator().render_markdown(bundle),
         )
+        initial_summary = RunVersionSummary(
+            version=1,
+            instruction="初始生成",
+            created_at=now,
+            changed_task_ids=(
+                "destination_intelligence",
+                "mobility_lodging",
+                "build_route_matrix",
+                "itinerary_planning",
+                "critic_review",
+                "final_aggregation",
+            ),
+            invalidated_artifact_ids=(),
+            current=True,
+        )
         self._runs[run_id] = StoredTripRun(
             resource=resource,
             result=result,
             token_hash=self._hash_token(access_token),
             events=self._fixture_events(now),
+            versions={1: result},
+            version_summaries=[initial_summary],
         )
         self._idempotency[idempotency_key] = (run_id, request_digest)
         return TripRunCreated(run=resource, access_token=access_token)
@@ -163,6 +186,172 @@ class InMemoryTripRunService:
         self._idempotency = {
             key: value for key, value in self._idempotency.items() if value[0] != run_id
         }
+
+    def replan(
+        self, run_id: str, access_token: str, request: ReplanRequest
+    ) -> TripRunResultResponse:
+        stored = self._authorized(run_id, access_token)
+        if stored.resource.state is TripRunState.CANCELLED:
+            raise RunConflictError("cancelled runs cannot be replanned")
+        if len(stored.versions) >= 3:
+            raise RunConflictError("at most two targeted replanning rounds are allowed")
+        if (
+            request.base_version is not None
+            and request.base_version != stored.resource.current_version
+        ):
+            raise RunConflictError("base_version is not the current run version")
+
+        next_version = max(stored.versions) + 1
+        now = datetime.now(UTC)
+        source = stored.result
+        bundle = self._apply_instruction(source.bundle, request.instruction, now)
+        result = source.model_copy(
+            update={
+                "version": next_version,
+                "bundle": bundle,
+                "markdown": FinalAggregator().render_markdown(bundle),
+            }
+        )
+        stored.versions[next_version] = result
+        stored.result = result
+        stored.version_summaries = [
+            item.model_copy(update={"current": False}) for item in stored.version_summaries
+        ]
+        stored.version_summaries.append(
+            RunVersionSummary(
+                version=next_version,
+                instruction=request.instruction,
+                created_at=now,
+                changed_task_ids=("itinerary_planning", "critic_review", "final_aggregation"),
+                invalidated_artifact_ids=(
+                    "artifact_candidates_fixture",
+                    "artifact_review_fixture",
+                    "artifact_final_bundle_fixture",
+                ),
+                current=True,
+            )
+        )
+        stored.resource = stored.resource.model_copy(
+            update={"current_version": next_version, "updated_at": now}
+        )
+        return result
+
+    def versions(self, run_id: str, access_token: str) -> RunVersionList:
+        stored = self._authorized(run_id, access_token)
+        return RunVersionList(run_id=run_id, versions=tuple(stored.version_summaries))
+
+    def diff(
+        self, run_id: str, access_token: str, from_version: int, to_version: int
+    ) -> RunVersionDiff:
+        stored = self._authorized(run_id, access_token)
+        if from_version not in stored.versions or to_version not in stored.versions:
+            raise RunNotFoundError(f"version {from_version} or {to_version}")
+        before = stored.versions[from_version].bundle.model_dump(mode="json")
+        after = stored.versions[to_version].bundle.model_dump(mode="json")
+        changed_paths = tuple(self._changed_paths(before, after))
+        return RunVersionDiff(
+            run_id=run_id,
+            from_version=from_version,
+            to_version=to_version,
+            changed_paths=changed_paths,
+            summary=f"版本 {from_version} → {to_version} 共改变 {len(changed_paths)} 个结构化路径",
+        )
+
+    def restore(self, run_id: str, access_token: str, version: int) -> TripRunResultResponse:
+        stored = self._authorized(run_id, access_token)
+        try:
+            restored = stored.versions[version]
+        except KeyError as exc:
+            raise RunNotFoundError(f"version {version}") from exc
+        stored.result = restored
+        stored.resource = stored.resource.model_copy(
+            update={"current_version": version, "updated_at": datetime.now(UTC)}
+        )
+        stored.version_summaries = [
+            item.model_copy(update={"current": item.version == version})
+            for item in stored.version_summaries
+        ]
+        return restored
+
+    def export(self, run_id: str, access_token: str, format_name: str) -> tuple[str, str]:
+        result = self.result(run_id, access_token)
+        if format_name == "markdown":
+            return result.markdown, "text/markdown; charset=utf-8"
+        if format_name == "json":
+            return result.bundle.model_dump_json(indent=2), "application/json"
+        raise RunConflictError("export format must be markdown or json")
+
+    @staticmethod
+    def _apply_instruction(
+        bundle: FinalPlanBundle, instruction: str, generated_at: datetime
+    ) -> FinalPlanBundle:
+        plans = list(bundle.plans)
+        entries = list(bundle.comparison.entries)
+        if "轻松" in instruction:
+            index = next(
+                (
+                    position
+                    for position, plan in enumerate(plans)
+                    if plan.strategy is PlanStrategy.RELAXED
+                ),
+                0,
+            )
+            plan = plans[index]
+            day = plan.days[0]
+            items = day.items[:1]
+            daily_cost = items[0].estimated_cost
+            plans[index] = plan.model_copy(
+                update={
+                    "days": (day.model_copy(update={"items": items, "daily_cost": daily_cost}),),
+                    "total_cost": daily_cost,
+                }
+            )
+            entry_index = next(
+                position for position, entry in enumerate(entries) if entry.plan_id == plan.plan_id
+            )
+            entries[entry_index] = entries[entry_index].model_copy(
+                update={
+                    "total_cost": daily_cost,
+                    "activity_count": 1,
+                    "commute_minutes": 0,
+                    "free_minutes": 480,
+                }
+            )
+        return bundle.model_copy(
+            update={
+                "plans": tuple(plans),
+                "comparison": PlanComparison(entries=tuple(entries)),
+                "assumptions": (*bundle.assumptions, f"用户修改：{instruction}"),
+                "collaboration_summary": bundle.collaboration_summary.model_copy(
+                    update={"revision_rounds": bundle.collaboration_summary.revision_rounds + 1}
+                ),
+                "generated_at": generated_at,
+            }
+        )
+
+    @classmethod
+    def _changed_paths(cls, before: object, after: object, prefix: str = "$") -> list[str]:
+        if type(before) is not type(after):
+            return [prefix]
+        if isinstance(before, dict) and isinstance(after, dict):
+            paths: list[str] = []
+            for key in sorted(set(before) | set(after)):
+                if key not in before or key not in after:
+                    paths.append(f"{prefix}.{key}")
+                else:
+                    paths.extend(cls._changed_paths(before[key], after[key], f"{prefix}.{key}"))
+            return paths
+        if isinstance(before, list) and isinstance(after, list):
+            paths = []
+            for index in range(max(len(before), len(after))):
+                if index >= len(before) or index >= len(after):
+                    paths.append(f"{prefix}[{index}]")
+                else:
+                    paths.extend(
+                        cls._changed_paths(before[index], after[index], f"{prefix}[{index}]")
+                    )
+            return paths
+        return [] if before == after else [prefix]
 
     def _stored(self, run_id: str) -> StoredTripRun:
         try:

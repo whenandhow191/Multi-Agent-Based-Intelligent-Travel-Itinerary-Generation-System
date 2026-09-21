@@ -4,12 +4,15 @@ from collections.abc import AsyncIterator
 from json import dumps
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from fastapi.responses import StreamingResponse
 
 from apps.api.run_models import (
     ClarificationAnswer,
     PlanComparisonResponse,
+    ReplanRequest,
+    RunVersionDiff,
+    RunVersionList,
     TripRunCreated,
     TripRunCreateRequest,
     TripRunResource,
@@ -169,3 +172,86 @@ async def delete_trip_run(run_id: str, service: RunService, access_token: Access
     except RunAccessError as exc:
         raise _access_denied(exc) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/{run_id}/replan", response_model=TripRunResultResponse)
+async def replan_trip_run(
+    run_id: str,
+    payload: ReplanRequest,
+    service: RunService,
+    access_token: AccessToken,
+) -> TripRunResultResponse:
+    try:
+        return service.replan(run_id, access_token, payload)
+    except RunNotFoundError as exc:
+        raise _not_found(exc) from exc
+    except RunAccessError as exc:
+        raise _access_denied(exc) from exc
+    except RunConflictError as exc:
+        raise _conflict(exc) from exc
+
+
+@router.get("/{run_id}/versions", response_model=RunVersionList)
+async def list_trip_run_versions(
+    run_id: str, service: RunService, access_token: AccessToken
+) -> RunVersionList:
+    try:
+        return service.versions(run_id, access_token)
+    except RunNotFoundError as exc:
+        raise _not_found(exc) from exc
+    except RunAccessError as exc:
+        raise _access_denied(exc) from exc
+
+
+@router.get("/{run_id}/versions/diff", response_model=RunVersionDiff)
+async def diff_trip_run_versions(
+    run_id: str,
+    service: RunService,
+    access_token: AccessToken,
+    from_version: Annotated[int, Query(alias="from", ge=1)],
+    to_version: Annotated[int, Query(alias="to", ge=1)],
+) -> RunVersionDiff:
+    try:
+        return service.diff(run_id, access_token, from_version, to_version)
+    except RunNotFoundError as exc:
+        raise _not_found(exc) from exc
+    except RunAccessError as exc:
+        raise _access_denied(exc) from exc
+
+
+@router.post("/{run_id}/versions/{version}/restore", response_model=TripRunResultResponse)
+async def restore_trip_run_version(
+    run_id: str,
+    version: int,
+    service: RunService,
+    access_token: AccessToken,
+) -> TripRunResultResponse:
+    try:
+        return service.restore(run_id, access_token, version)
+    except RunNotFoundError as exc:
+        raise _not_found(exc) from exc
+    except RunAccessError as exc:
+        raise _access_denied(exc) from exc
+
+
+@router.get("/{run_id}/export")
+async def export_trip_run(
+    run_id: str,
+    service: RunService,
+    access_token: AccessToken,
+    format_name: Annotated[str, Query(alias="format", pattern="^(markdown|json)$")] = "markdown",
+) -> Response:
+    try:
+        content, media_type = service.export(run_id, access_token, format_name)
+    except RunNotFoundError as exc:
+        raise _not_found(exc) from exc
+    except RunAccessError as exc:
+        raise _access_denied(exc) from exc
+    except RunConflictError as exc:
+        raise _conflict(exc) from exc
+    extension = "md" if format_name == "markdown" else "json"
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{run_id}.{extension}"'},
+    )

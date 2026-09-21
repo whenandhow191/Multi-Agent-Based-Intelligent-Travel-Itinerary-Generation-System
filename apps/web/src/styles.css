@@ -163,7 +163,8 @@ h1 em {
 .run-status,
 .error-card,
 .collaboration-card,
-.itinerary-card {
+.itinerary-card,
+.replan-card {
   border: 1px solid #d8d0c1;
   border-radius: 22px;
   background: rgb(251 248 240 / 92%);
@@ -262,7 +263,8 @@ textarea:focus {
 .run-status,
 .error-card,
 .collaboration-card,
-.itinerary-card {
+.itinerary-card,
+.replan-card {
   margin-top: 24px;
   padding: 30px;
 }
@@ -549,6 +551,129 @@ textarea:focus {
   font-size: 0.78rem;
 }
 
+.replan-card {
+  margin-top: 24px;
+  padding: clamp(24px, 4vw, 46px);
+}
+
+.export-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.export-actions button,
+.version-item button {
+  padding: 8px 11px;
+  border: 1px solid #cfc5b5;
+  border-radius: 8px;
+  background: #fffdf8;
+  color: var(--forest);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.replan-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: end;
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--forest);
+}
+
+.replan-form label {
+  color: #bcd0c7;
+}
+
+.replan-form .primary-action {
+  margin: 0;
+  background: var(--coral);
+  white-space: nowrap;
+}
+
+.replan-message {
+  margin: 14px 0 0;
+  color: #536c61;
+  font-size: 0.82rem;
+}
+
+.version-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+  margin-top: 32px;
+}
+
+.version-layout h3 {
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.version-list {
+  display: grid;
+  gap: 9px;
+  padding: 0;
+  list-style: none;
+}
+
+.version-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px 12px;
+  padding: 14px;
+  border: 1px solid #dbd4c8;
+  border-radius: 10px;
+}
+
+.version-item--current {
+  border-color: #789789;
+  background: #ecf1eb;
+}
+
+.version-item div {
+  display: flex;
+  gap: 12px;
+}
+
+.version-item span,
+.version-item small {
+  color: #718078;
+}
+
+.version-item small {
+  grid-column: 1 / -1;
+  overflow-wrap: anywhere;
+}
+
+.version-item em {
+  color: #3f8365;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.diff-panel,
+.empty-diff {
+  padding: 16px;
+  border-radius: 10px;
+  background: #f1ecdf;
+  color: #607068;
+  font-size: 0.8rem;
+}
+
+.diff-panel ul {
+  display: grid;
+  gap: 7px;
+  padding-left: 20px;
+}
+
+.diff-panel code {
+  overflow-wrap: anywhere;
+  color: #8a4c36;
+}
+
 .cost-badge {
   padding: 8px 12px;
   border-radius: 8px;
@@ -714,5 +839,15 @@ textarea:focus {
   .metric-row,
   .itinerary-layout {
     grid-template-columns: 1fr;
+  }
+
+  .version-layout,
+  .replan-form {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    gap: 16px;
+    flex-direction: column;
   }
 }

@@ -98,3 +98,38 @@ class PlanComparisonResponse(BaseModel):
     run_id: str
     comparison: PlanComparison
     generated_at: datetime
+
+
+class ReplanRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    instruction: Annotated[str, Field(min_length=3, max_length=1_000)]
+    base_version: Annotated[int | None, Field(ge=1)] = None
+
+
+class RunVersionSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    version: Annotated[int, Field(ge=1)]
+    instruction: str
+    created_at: AwareDatetime
+    changed_task_ids: tuple[str, ...]
+    invalidated_artifact_ids: tuple[str, ...]
+    current: bool = False
+
+
+class RunVersionList(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: str
+    versions: tuple[RunVersionSummary, ...]
+
+
+class RunVersionDiff(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: str
+    from_version: Annotated[int, Field(ge=1)]
+    to_version: Annotated[int, Field(ge=1)]
+    changed_paths: tuple[str, ...]
+    summary: str

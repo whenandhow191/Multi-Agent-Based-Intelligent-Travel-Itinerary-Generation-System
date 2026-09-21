@@ -99,6 +99,10 @@ describe("App", () => {
           map_points: [],
           markdown: "# fixture",
         }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ versions: [] }),
       });
     vi.stubGlobal("fetch", fetchMock);
     vi.stubGlobal("crypto", { randomUUID: () => "idempotency-fixture" });
@@ -115,6 +119,9 @@ describe("App", () => {
     expect(
       await screen.findByRole("heading", { name: "行程、地图与证据同步" }),
     ).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(
+      screen.getByRole("heading", { name: "不推倒重来，只修改必要部分" }),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 });
