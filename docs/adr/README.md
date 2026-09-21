@@ -21,3 +21,4 @@ ADR 用于记录影响多个模块、难以回滚或需要明确取舍的技术�
 | ADR-0003 | Harness 内核与持久恢复 | Accepted |
 | ADR-0004 | 1+4 Agent 职责与确定性边界 | Accepted |
 | ADR-0005 | 共享黑板与可验证工作流 | Accepted |
+| ADR-0006 | 可观测、安全与发布闸门 | Accepted |

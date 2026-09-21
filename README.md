@@ -20,7 +20,7 @@
 - 第六章“真实工具与数据源逐个接入”：已完成（C27～C33）。
 - 第七章“模型配置、成本与评测”：已完成（C34～C38，里程碑 `v0.3.0`）。
 - 第八章“后端与前端产品化”：已完成（C39～C44，里程碑 `v0.4.0`）。
-- 后续将按 `docs/03-教学式开发路线与Git交付计划.md` 逐个检查点交付。
+- 第九章“系统加固与发布”：已完成（C45～C49，正式版 `v1.0.0`）。
 
 逐文件导航见 [代码地图](./docs/04-代码地图.md)。分章复现过程见
 [第一章实现说明](./docs/05-第一章实现说明.md)、
@@ -30,11 +30,15 @@
 [第五章实现说明](./docs/09-第五章实现说明.md) 和
 [第六章实现说明](./docs/10-第六章实现说明.md) 和
 [第七章实现说明](./docs/11-第七章实现说明.md) 和
-[第八章实现说明](./docs/12-第八章实现说明.md)。
+[第八章实现说明](./docs/12-第八章实现说明.md) 和
+[第九章实现说明](./docs/13-第九章实现说明.md)。部署、升级、密钥和回滚见
+[部署与发布说明](./docs/14-部署与发布说明.md)，最终证据见
+[最终验收报告](./docs/15-最终验收报告.md)。
 
 ## 本地质量检查
 
-项目要求 Python 3.12、Node.js 20～24、pnpm 10～11 和 `uv`。安装依赖后运行：
+项目要求 Python 3.12、Node.js 20～24、pnpm 10～11、`uv`，或直接使用 Docker
+Desktop。安装依赖后运行：
 
 ```shell
 pnpm check
@@ -42,19 +46,47 @@ pnpm check
 
 该命令依次执行格式检查、Lint、类型检查和测试，与 GitHub Actions 保持一致。
 
-## 本地启动
+## 新机器快速开始（Fixture，无需 API Key）
 
 ```powershell
 conda env create --prefix .\.conda\env --file environment.yml
 conda activate .\.conda\env
-uv sync --all-groups
-pnpm install
+uv sync --active --all-groups --frozen
+pnpm install --frozen-lockfile
 Copy-Item .env.example .env
 python -m apps.api.config doctor
+pnpm demo
+```
+
+`pnpm demo` 会生成一份北京一日、三个候选方案的完整合成结果摘要，用于确认 Python、领域契约、Run Service、Artifact 和最终聚合均可工作。它不访问网络，也不读取真实库存。
+
+启动完整 Web 产品：
+
+```powershell
 docker compose up --build
 ```
 
-项目专用 Conda 环境、uv 虚拟环境、依赖缓存和 `.env` 均已被 Git 忽略。默认 Mock 模式不要求任何外部 Provider Key。
+等待容器健康后访问：
+
+- 产品页：`http://localhost:5173`
+- OpenAPI：`http://localhost:8000/docs`
+- 健康检查：`http://localhost:8000/health`
+
+停止服务使用 `docker compose down`。只有明确需要清空本地 PostgreSQL 数据时才使用
+`docker compose down --volumes`。
+
+项目专用 Conda 环境、uv 虚拟环境、依赖缓存和 `.env` 均被 Git 忽略。默认
+`MOCK_MODE=true`，不要求任何 Provider Key；真实 Key 只写本机 `.env` 或部署平台的 Secret。
+
+## 发布验收
+
+```powershell
+pnpm check
+pnpm demo
+docker compose config --quiet
+```
+
+推送形如 `v1.0.0` 的 Tag 后，Release 工作流会重新执行迁移、质量闸门、演示和镜像构建，全部成功后创建不可变 GitHub Release。
 
 ## 参与贡献
 

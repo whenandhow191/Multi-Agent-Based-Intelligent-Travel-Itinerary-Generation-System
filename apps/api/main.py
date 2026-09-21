@@ -22,7 +22,7 @@ settings = get_settings()
 
 app = FastAPI(
     title="Multi-Agent Travel Planner API",
-    version="0.4.0",
+    version="1.0.0",
     description="API surface for the self-hosted travel planning harness.",
 )
 app.add_middleware(

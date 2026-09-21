@@ -23,10 +23,15 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      APP_ENV: development
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/travel_agent
+      APP_ENV: ${APP_ENV:-development}
+      DEBUG: ${DEBUG:-false}
+      MOCK_MODE: ${MOCK_MODE:-true}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-travel_agent}
+      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AMAP_WEB_SERVICE_KEY: ${AMAP_WEB_SERVICE_KEY:-}
+      QWEATHER_API_KEY: ${QWEATHER_API_KEY:-}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
     ports:
       - "${API_PORT:-8000}:8000"
@@ -52,8 +57,8 @@ services:
       dockerfile: apps/api/Dockerfile
     command: ["/workspace/.venv/bin/alembic", "upgrade", "head"]
     environment:
-      APP_ENV: development
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/travel_agent
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-travel_agent}
     depends_on:
       db:
         condition: service_healthy

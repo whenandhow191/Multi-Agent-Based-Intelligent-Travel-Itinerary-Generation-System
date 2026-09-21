@@ -1,6 +1,6 @@
 {
   "name": "travel-agent-workspace",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@11.19.0",
   "engines": {
@@ -16,6 +16,7 @@
     "build": "pnpm --filter @travel/web build",
     "db:upgrade": "uv run --active alembic upgrade head",
     "db:sql": "uv run --active alembic upgrade head --sql",
+    "demo": "uv run --active python -m apps.api.demo",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   }
 }
