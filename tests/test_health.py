@@ -21,5 +21,5 @@ def test_health_endpoint() -> None:
     assert response.json() == {
         "status": "ok",
         "service": "travel-api",
-        "version": "0.1.0",
+        "version": "0.4.0",
     }

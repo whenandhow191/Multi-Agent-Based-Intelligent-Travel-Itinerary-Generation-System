@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from apps.api.run_routes import router as run_router
 from apps.api.settings import get_settings
 
 
@@ -21,16 +22,17 @@ settings = get_settings()
 
 app = FastAPI(
     title="Multi-Agent Travel Planner API",
-    version="0.1.0",
+    version="0.4.0",
     description="API surface for the self-hosted travel planning harness.",
 )
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["*"],
 )
+app.include_router(run_router)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["operations"])
